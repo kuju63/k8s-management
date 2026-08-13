@@ -20,7 +20,7 @@ export class AppsChart extends Chart {
         createGitApplication(this, "argocd-application", {
             name: "review-service",
             namespace: NAMESPACE,
-            repoUrl: "https://github.com/TODO-owner/TODO-review-service.git",
+            repoUrl: "https://github.com/kuju63/code-review-agents.git",
             targetRevision: "main",
             path: "manifests",
         });
