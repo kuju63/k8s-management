@@ -12,7 +12,9 @@ export interface HelmApplicationProps {
     readonly repoUrl: string;
     /** 通常の Helm リポジトリの場合のみ指定（OCI の場合は repoUrl にチャート名まで含まれるため省略）。 */
     readonly chart?: string;
+    /** チャートのバージョン(通常の Helm リポジトリ)、または OCI タグ。 */
     readonly targetRevision: string;
+    /** Helm values を上書きするオブジェクト。指定しない場合はチャートのデフォルト値を使う。 */
     readonly valuesObject?: Record<string, unknown>;
 }
 
