@@ -1,0 +1,23 @@
+{
+  "skill_name": "helm-chart-version-check",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "packages/ns配下のcreateHelmApplicationで使っているHelmチャートのtargetRevisionをチェックして、更新があれば最新化してほしい。メジャーバージョン更新は別扱いにしてまとめて。",
+      "expected_output": "scan→resolve→applyが実行され、patch/minor更新は自動でtargetRevisionが書き換わり、major更新はtargetRevisionの値は変えずに直後へ警告コメントが挿入される。最後にメジャー更新一覧のMarkdown表が提示される。実行後にpnpm compileが通ることを確認している。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "ArgoCD ApplicationのHelm依存で何かメジャーアップデートが来てないか確認して。",
+      "expected_output": "scan→resolve→reportが実行され、kind==majorのレコードのみをMarkdown表にまとめて提示する。ファイルは書き換えない、もしくはユーザーが読み取り専用の確認を意図している旨を汲み取り、reportまでに留める判断も許容される。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "envoy-gatewayのHelmチャート、最新版と比較してどうなってる？",
+      "expected_output": "envoy-gateway-system/index.tsのcreateHelmApplication呼び出し（OCI: oci://docker.io/envoyproxy/gateway-helm）に対してresolveを行い、現在のtargetRevisionと最新タグを比較した結果を報告する。他の8箇所を無視して1件だけに絞って回答しても良い。",
+      "files": []
+    }
+  ]
+}

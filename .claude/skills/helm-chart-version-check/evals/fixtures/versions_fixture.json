@@ -1,0 +1,8 @@
+{
+  "https://example.github.io/charts|example-chart": "1.3.0",
+  "https://major-example.github.io/charts|major-chart": "3.0.0",
+  "https://prometheus-community.github.io/helm-charts|kube-prometheus-stack": "88.4.0",
+  "https://grafana.github.io/helm-charts|loki": "8.0.0",
+  "https://grafana.github.io/helm-charts|alloy": "1.11.2",
+  "https://jaegertracing.github.io/helm-charts|jaeger": "4.12.0"
+}

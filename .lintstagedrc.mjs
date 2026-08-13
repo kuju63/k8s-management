@@ -21,6 +21,5 @@ export default {
   ],
 
   // ---- 4. 除外パス（必要に応じてコメントアウト解除） ----
-  // '!**/vendor/**/*',
-  // '!**/.git/**/*',
+  '.claude/skills/helm-chart-version-check/**/*': []
 };
