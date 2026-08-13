@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  destination:
+    namespace: monitoring
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: kube-prometheus-stack
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 65.5.1
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki-stack
+  namespace: argocd
+spec:
+  destination:
+    namespace: monitoring
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: loki-stack
+    helm:
+      valuesObject:
+        promtail:
+          enabled: true
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: 2.10.2
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jaeger
+  namespace: argocd
+spec:
+  destination:
+    namespace: monitoring
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: jaeger
+    helm:
+      valuesObject:
+        allInOne:
+          enabled: true
+        collector:
+          enabled: false
+        query:
+          enabled: false
+        storage:
+          type: memory
+    repoURL: https://jaegertracing.github.io/helm-charts
+    targetRevision: 3.4.1
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  hostnames:
+    - grafana.home.local
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  rules:
+    - backendRefs:
+        - name: kube-prometheus-stack-grafana
+          port: 80

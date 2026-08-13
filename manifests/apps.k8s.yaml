@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: apps
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: review-service
+  namespace: argocd
+spec:
+  destination:
+    namespace: apps
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    directory:
+      recurse: false
+    path: manifests
+    repoURL: https://github.com/TODO-owner/TODO-review-service.git
+    targetRevision: main
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: review-service
+  namespace: apps
+spec:
+  hostnames:
+    - review.home.local
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  rules:
+    - backendRefs:
+        - name: review-service
+          port: 80

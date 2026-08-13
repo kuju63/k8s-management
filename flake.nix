@@ -19,6 +19,7 @@
             gh
             pnpm
             betterleaks
+            kubectl
           ];
 
           shellHook = ''
@@ -28,6 +29,7 @@
             echo "  git:         $(git --version)"
             echo "  gh:          $(gh --version | head -n1)"
             echo "  betterleaks: $(betterleaks version)"
+            echo "  kubectl:     $(kubectl version --client --output=yaml | head -n2 | tail -n1)"
           '';
         };
       });
