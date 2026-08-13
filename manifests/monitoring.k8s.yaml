@@ -16,7 +16,7 @@ spec:
   source:
     chart: kube-prometheus-stack
     repoURL: https://prometheus-community.github.io/helm-charts
-    targetRevision: 65.5.1
+    targetRevision: 88.3.0
   syncPolicy:
     automated:
       prune: true
@@ -25,7 +25,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: loki-stack
+  name: loki
   namespace: argocd
 spec:
   destination:
@@ -33,13 +33,99 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    chart: loki-stack
+    chart: loki
     helm:
       valuesObject:
-        promtail:
-          enabled: true
+        chunksCache:
+          enabled: false
+        deploymentMode: SingleBinary
+        loki:
+          auth_enabled: false
+          commonConfig:
+            replication_factor: 1
+          storage:
+            type: filesystem
+          useTestSchema: true
+        resultsCache:
+          enabled: false
+        singleBinary:
+          replicas: 1
     repoURL: https://grafana.github.io/helm-charts
-    targetRevision: 2.10.2
+    targetRevision: 7.3.0
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy
+  namespace: argocd
+spec:
+  destination:
+    namespace: monitoring
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: alloy
+    helm:
+      valuesObject:
+        alloy:
+          configMap:
+            content: |
+              discovery.kubernetes "pod" {
+                role = "pod"
+                selectors {
+                  role  = "pod"
+                  field = "spec.nodeName=" + coalesce(sys.env("HOSTNAME"), constants.hostname)
+                }
+              }
+
+              discovery.relabel "pod_logs" {
+                targets = discovery.kubernetes.pod.targets
+
+                rule {
+                  source_labels = ["__meta_kubernetes_namespace"]
+                  target_label  = "namespace"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_name"]
+                  target_label  = "pod"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_container_name"]
+                  target_label  = "container"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_node_name"]
+                  target_label  = "node"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_container_name"]
+                  separator     = "/"
+                  target_label  = "job"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+                  separator     = "/"
+                  target_label  = "__path__"
+                  replacement   = "/var/log/pods/*$1/*.log"
+                }
+              }
+
+              loki.source.kubernetes "pod_logs" {
+                targets    = discovery.relabel.pod_logs.output
+                forward_to = [loki.write.default.receiver]
+              }
+
+              loki.write "default" {
+                endpoint {
+                  url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+                }
+              }
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: 1.11.1
   syncPolicy:
     automated:
       prune: true
@@ -68,7 +154,7 @@ spec:
         storage:
           type: memory
     repoURL: https://jaegertracing.github.io/helm-charts
-    targetRevision: 3.4.1
+    targetRevision: 4.12.0
   syncPolicy:
     automated:
       prune: true

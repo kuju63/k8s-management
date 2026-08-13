@@ -18,12 +18,12 @@ export class EnvoyGatewaySystemChart extends Chart {
 
         createNamespace(this, NAMESPACE);
 
-        // repoURL/targetRevision は要検証（upstream の最新値を確認すること）。
+        // targetRevision: 2026-08-13 時点の docker.io/envoyproxy/gateway-helm 最新安定タグ。
         createHelmApplication(this, "argocd-application", {
             name: "envoy-gateway",
             namespace: NAMESPACE,
             repoUrl: "oci://docker.io/envoyproxy/gateway-helm",
-            targetRevision: "1.2.0",
+            targetRevision: "1.8.3",
         });
 
         new ApiObject(this, "gateway-class", {

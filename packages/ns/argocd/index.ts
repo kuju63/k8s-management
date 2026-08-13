@@ -31,13 +31,13 @@ export class ArgocdChart extends Chart {
         });
 
         // ArgoCD 自身の以後のアップグレードを ArgoCD 自身に管理させる（self-managing）。
-        // repoURL/targetRevision は要検証（upstream の最新値を確認すること）。
+        // targetRevision: 2026-08-13 時点の argo-helm/argo-cd チャート最新版。
         createHelmApplication(this, "argocd-self", {
             name: "argocd",
             namespace: NAMESPACE,
             repoUrl: "https://argoproj.github.io/argo-helm",
             chart: "argo-cd",
-            targetRevision: "7.7.11",
+            targetRevision: "10.3.3",
         });
 
         // 運用系UIへの経路（ノートでは点線＝要認証として明示）。

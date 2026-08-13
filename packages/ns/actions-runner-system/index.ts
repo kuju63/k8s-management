@@ -15,12 +15,13 @@ export class ActionsRunnerSystemChart extends Chart {
 
         createNamespace(this, NAMESPACE);
 
-        // repoURL/targetRevision は要検証（upstream の最新値を確認すること）。
+        // targetRevision: 2026-08-13 時点の ghcr.io actions-runner-controller-charts 最新版。
+        // arc-runners の gha-runner-scale-set と同じバージョンで揃える(セットでリリースされるため)。
         createHelmApplication(this, "argocd-application", {
             name: "arc-controller",
             namespace: NAMESPACE,
             repoUrl: "oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller",
-            targetRevision: "0.9.3",
+            targetRevision: "0.14.2",
         });
     }
 }

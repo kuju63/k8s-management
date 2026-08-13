@@ -5,6 +5,61 @@ import { createNamespace } from "../../lib/namespace.js";
 
 const NAMESPACE = "monitoring";
 const PROMETHEUS_STACK_RELEASE = "kube-prometheus-stack";
+const LOKI_RELEASE = "loki";
+
+// Alloy(DaemonSet)が自ノード上の Pod ログのみを収集し、Loki の gateway へ push する最小構成。
+// https://grafana.com/docs/alloy/latest/collect/logs-in-kubernetes/ の例を簡略化したもの。
+const ALLOY_CONFIG = `discovery.kubernetes "pod" {
+  role = "pod"
+  selectors {
+    role  = "pod"
+    field = "spec.nodeName=" + coalesce(sys.env("HOSTNAME"), constants.hostname)
+  }
+}
+
+discovery.relabel "pod_logs" {
+  targets = discovery.kubernetes.pod.targets
+
+  rule {
+    source_labels = ["__meta_kubernetes_namespace"]
+    target_label  = "namespace"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_name"]
+    target_label  = "pod"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_container_name"]
+    target_label  = "container"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_node_name"]
+    target_label  = "node"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_container_name"]
+    separator     = "/"
+    target_label  = "job"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+    separator     = "/"
+    target_label  = "__path__"
+    replacement   = "/var/log/pods/*$1/*.log"
+  }
+}
+
+loki.source.kubernetes "pod_logs" {
+  targets    = discovery.relabel.pod_logs.output
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://${LOKI_RELEASE}-gateway.${NAMESPACE}.svc.cluster.local/loki/api/v1/push"
+  }
+}
+`;
 
 /**
  * ns: monitoring（運用系: 可観測性）
@@ -16,7 +71,7 @@ export class MonitoringChart extends Chart {
 
         createNamespace(this, NAMESPACE);
 
-        // repoURL/chart/targetRevision はいずれも要検証（upstream の最新値を確認すること）。
+        // targetRevision: 2026-08-13 時点の各Helmリポジトリでの最新版。
 
         // Prometheus + Grafana + Alertmanager。
         createHelmApplication(this, "argocd-application-prometheus", {
@@ -24,18 +79,44 @@ export class MonitoringChart extends Chart {
             namespace: NAMESPACE,
             repoUrl: "https://prometheus-community.github.io/helm-charts",
             chart: "kube-prometheus-stack",
-            targetRevision: "65.5.1",
+            targetRevision: "88.3.0",
         });
 
-        // Loki + Promtail（各ノードの DaemonSet からログを収集）。
+        // Loki（filesystem storage・SingleBinaryモードの最小構成。`loki-stack` は
+        // upstream で deprecated のため後継の `loki` チャートを使う）。
         createHelmApplication(this, "argocd-application-loki", {
-            name: "loki-stack",
+            name: LOKI_RELEASE,
             namespace: NAMESPACE,
             repoUrl: "https://grafana.github.io/helm-charts",
-            chart: "loki-stack",
-            targetRevision: "2.10.2",
+            chart: "loki",
+            targetRevision: "7.3.0",
             valuesObject: {
-                promtail: { enabled: true },
+                deploymentMode: "SingleBinary",
+                loki: {
+                    auth_enabled: false,
+                    commonConfig: { replication_factor: 1 },
+                    storage: { type: "filesystem" },
+                    useTestSchema: true,
+                },
+                singleBinary: { replicas: 1 },
+                // memcached ベースのキャッシュはホームラボ規模では不要なリソース消費のため無効化。
+                resultsCache: { enabled: false },
+                chunksCache: { enabled: false },
+            },
+        });
+
+        // Grafana Alloy（各ノードの DaemonSet として Pod ログを収集し、Loki へ push する。
+        // Promtail は upstream で deprecated のため Alloy を使う）。
+        createHelmApplication(this, "argocd-application-alloy", {
+            name: "alloy",
+            namespace: NAMESPACE,
+            repoUrl: "https://grafana.github.io/helm-charts",
+            chart: "alloy",
+            targetRevision: "1.11.1",
+            valuesObject: {
+                alloy: {
+                    configMap: { content: ALLOY_CONFIG },
+                },
             },
         });
 
@@ -45,7 +126,7 @@ export class MonitoringChart extends Chart {
             namespace: NAMESPACE,
             repoUrl: "https://jaegertracing.github.io/helm-charts",
             chart: "jaeger",
-            targetRevision: "3.4.1",
+            targetRevision: "4.12.0",
             valuesObject: {
                 allInOne: { enabled: true },
                 collector: { enabled: false },

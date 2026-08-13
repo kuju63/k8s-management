@@ -16,12 +16,13 @@ export class ArcRunnersChart extends Chart {
 
         // githubConfigUrl/githubConfigSecret は対象リポジトリ・組織が未確定のため TODO。
         // githubConfigSecret はここでは平文Secretを作らず、事前に kubectl 等で作成済みのSecret名を指す想定。
-        // repoURL/targetRevision は要検証（upstream の最新値を確認すること）。
+        // targetRevision: 2026-08-13 時点の ghcr.io actions-runner-controller-charts 最新版。
+        // actions-runner-system の gha-runner-scale-set-controller と同じバージョンで揃える。
         createHelmApplication(this, "argocd-application", {
             name: "arc-runners",
             namespace: NAMESPACE,
             repoUrl: "oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set",
-            targetRevision: "0.9.3",
+            targetRevision: "0.14.2",
             valuesObject: {
                 githubConfigUrl: "https://github.com/TODO-org/TODO-repo",
                 githubConfigSecret: "TODO-github-config-secret",
