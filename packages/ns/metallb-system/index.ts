@@ -16,13 +16,12 @@ export class MetallbSystemChart extends Chart {
 
         createNamespace(this, NAMESPACE);
 
-        // repoURL/chart/targetRevision は要検証（upstream の最新値を確認すること）。
         createHelmApplication(this, "argocd-application", {
             name: "metallb",
             namespace: NAMESPACE,
             repoUrl: "https://metallb.github.io/metallb",
             chart: "metallb",
-            targetRevision: "0.14.9",
+            targetRevision: "0.16.1",
         });
 
         new ApiObject(this, "ip-address-pool", {
