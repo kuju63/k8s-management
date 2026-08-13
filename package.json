@@ -2,10 +2,11 @@
   "name": "k8s-management",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky"
+    "prepare": "husky",
+    "compile": "tsc --build"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +20,7 @@
   },
   "type": "module",
   "devDependencies": {
+    "@types/node": "^26.2.0",
     "biome": "^0.3.3",
     "husky": "^9.1.7",
     "lint-staged": "^17.3.0",
