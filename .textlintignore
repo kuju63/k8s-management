@@ -1,3 +1,4 @@
+node_modules/**
 .claude/skills/helm-chart-version-check/**/*
 CLAUDE.md
 AGENTS.md
