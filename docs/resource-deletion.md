@@ -63,9 +63,22 @@ function buildApp(): App {
 }
 ```
 
-`pnpm run synth` を実行すると `manifests/example-batch.k8s.yaml` が
-生成されなくなる。この YAML の消失が git 上の差分として現れることを
-確認してから commit する。
+**注意**: `pnpm run synth` を実行しても `manifests/example-batch.k8s.yaml`
+は自動では消えない。cdk8s の `App.synth()` は、その時点で App に
+登録されている Chart についてのみ出力ファイルを書き込む。outdir 内の
+古いファイルを削除するクリーンアップ処理は持たない
+（`node_modules/cdk8s/lib/app.js` 参照）。Chart を丸ごと削除した場合、
+対応する manifest ファイルは synth 後も残り続けるため、明示的に
+`git rm` で削除する必要がある。
+
+```sh
+git rm manifests/example-batch.k8s.yaml
+```
+
+この `git rm` によって manifest の消失が git 上の差分として現れる。
+差分を確認してから commit する。個別リソースの削除（Chart 自体は残す
+場合）ではこの手動削除は不要。対象 Chart が引き続き synth されるたびに
+manifest ファイル全体が上書きされ、削除したリソースは自然に消える。
 
 ## 個別のリソースだけを削除する
 
@@ -137,10 +150,16 @@ ArgoCD がその Application を prune すると、Application 配下で Helm
    namespace を丸ごと削除する場合はファイル自体を削除する
 2. namespace を丸ごと削除する場合のみ、`packages/main.ts` の
    `buildApp()` から `new XxxChart(app);` と対応する import を削除する
-3. `pnpm run synth` を実行し、`manifests/` から該当リソースが消えたこと
-   （または該当ファイル自体が消えたこと）を確認する
-4. 差分を commit し、リモートへ push する
-5. ArgoCD の root Application が変更を検知し、`prune: true` により
+3. `pnpm run synth` を実行する。個別リソース削除の場合はこの時点で
+   `manifests/` の該当ファイルが上書きされ、削除が反映される
+4. namespace を丸ごと削除する場合のみ、対応する
+   `manifests/<namespace>.k8s.yaml` を `git rm` で手動削除する。
+   cdk8s の `synth()` は outdir のクリーンアップを行わないため、
+   Chart を削除しても古い manifest ファイルは残ってしまう
+5. `git status` / `git diff` で意図した差分（リソースの消失、または
+   manifest ファイル自体の削除）になっていることを確認する
+6. 差分を commit し、リモートへ push する
+7. ArgoCD の root Application が変更を検知し、`prune: true` により
    自動的にクラスタからリソースを削除する
 
 ## 緊急時に手動で削除する場合の注意
