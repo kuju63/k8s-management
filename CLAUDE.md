@@ -18,6 +18,8 @@ This file provides guidance to Claude Code (claude.ai/code) and other coding age
 pnpm run synth   # packages/ を compile し、manifests/ を再生成するだけ
 pnpm run apply   # synth した上で kubectl apply -R -f manifests/ まで行う
 pnpm compile     # tsc --build のみ
+pnpm exec markdownlint-cli2 "**/*.md"   # ドキュメント更新時のlintチェック
+pnpm exec textlint "**/*.md"   # ドキュメント更新時、文体などのlintチェック
 ```
 
 テストは未整備（`pnpm test` はプレースホルダで常に失敗する）。lint/format は `lint-staged` 経由でpre-commit hook（husky）が実行し、package.json に個別の lint スクリプトは無い。手動で走らせる場合:
@@ -96,6 +98,8 @@ ArgoCD 自体はこのリポジトリのコードだけでは導入できない�
   ConfigMap/Secret の運用方針
 - [docs/resource-deletion.md](docs/resource-deletion.md)
   namespace 丸ごと削除・個別リソース削除・緊急時の手動削除の注意点
+- [docs/git-conventions.md](docs/git-conventions.md)
+  Git コミットメッセージ・PR タイトル・PR 本文の記述規約
 
 ## Skills
 
