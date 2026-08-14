@@ -1,6 +1,5 @@
 /**
  * このリポジトリ自身の git リポジトリURL。
- * TODO: GitHub 等に push したら実際のURLに差し替える（現状 `git remote` 未設定）。
  */
 export const GIT_REPO_URL = "https://github.com/kuju63/k8s-management.git";
 
