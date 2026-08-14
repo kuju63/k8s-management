@@ -12,6 +12,9 @@
   にする。`packages/ns/argocd/index.ts` の App-of-Apps root
   （`app-of-apps` Application）専用のヘルパー。通常の namespace 追加作業
   では使わない
+- `createContainerApplication` — コンテナイメージから直接 Deployment/Service
+  を作る。内部で bjw-s-labs/app-template という汎用 Helm チャートをラップ
+  しており、Helm チャートを自作せずに単一コンテナのアプリを追加できる
 
 HTTPRoute（Gateway API）は ArgoCD Application とは別のリソース。公開したい
 Service を持つ namespace の Chart 内に、生の `ApiObject` として追加する。
@@ -78,6 +81,75 @@ createGitApplication(this, "argocd-application", {
 
 `recurse` を指定しない場合は `false` 扱いになり、`path` 直下のみを watch
 する。サブディレクトリも含めて watch したい場合は `recurse: true` を渡す。
+
+## `createContainerApplication` でコンテナイメージから直接追加する
+
+Helm チャートや Deployment/Service のマニフェストを自前で書く必要はない。
+コンテナイメージ・env・envFrom・永続化ボリューム・Service を指定するだけで
+ArgoCD Application を作れる。内部では
+[bjw-s-labs/app-template](https://github.com/bjw-s-labs/helm-charts) という
+汎用 Helm チャートを `createHelmApplication` 経由でラップしている。
+呼び出し側は Helm チャートの存在を意識する必要はない。
+
+```ts
+import { createContainerApplication } from "../../lib/argocd-application.js";
+
+createContainerApplication(this, "argocd-application", {
+    name: "example-app",
+    namespace: NAMESPACE,
+    targetRevision: "5.0.1",
+    image: { repository: "ghcr.io/example-org/example-app", tag: "1.0.0" },
+    env: {
+        LOG_LEVEL: "info",
+        DB_PASSWORD: {
+            secretKeyRef: { name: "example-app-secret", key: "db-password" },
+        },
+    },
+    envFrom: [{ configMapRef: { name: "example-app-config" } }],
+    persistence: {
+        data: {
+            type: "persistentVolumeClaim",
+            accessMode: "ReadWriteOnce",
+            size: "1Gi",
+            globalMounts: [{ path: "/data" }],
+        },
+    },
+    service: {
+        ports: { http: { port: 8080 } },
+    },
+});
+```
+
+`targetRevision` は他の3つのヘルパーと意味が異なる点に注意。これは
+bjw-s-labs/app-template チャート自体のバージョンであり、デプロイしたい
+アプリケーション自体のバージョンは `image.tag` 側で指定する。
+
+`env` は「単純な文字列」または `secretKeyRef`/`configMapKeyRef` による
+特定キー参照のどちらかしか指定できない。**Secret の平文値を直接書くことは
+できない**設計になっている（[config-and-secrets.md](./config-and-secrets.md)
+の方針どおり、Secret はキー参照のみ）。参照先の Secret/ConfigMap は
+事前に対象 namespace へ作成されている必要がある。
+
+`persistence` は `persistentVolumeClaim`・`configMap`・`secret`・`emptyDir`
+の4種類をサポートする。`configMap`/`secret` タイプは、この呼び出しの外で
+既に作られているリソースの `name` を参照する形のみサポートする。
+
+**`syncPolicy.automated.prune: true` は常に有効になっている。**
+`persistence` の項目をコードから削除すると、対応する PVC も自動で
+削除される（データ消失）。既存3ヘルパーはこのリポジトリで PVC を作る
+経路が無かったため影響しなかったが、`createContainerApplication` では
+運用上の注意点になる。
+
+`service` を指定した場合、生成される Service 名は `props.name` と同じになる。
+`props.name` は Application の name であり、Helm の release 名とも一致する。
+これはヘルパー内部で `nameOverride` を `props.name` に固定して実現している。
+そのため、通常の `createHelmApplication` 呼び出しのように「チャートの
+命名規則を確認する」必要はない。HTTPRoute の `backendRefs.name` には
+この値をそのまま使える。
+
+Ingress/HTTPRoute はこのヘルパーの対象外。外部公開が必要な場合は次項の
+「HTTPRoute を追加する」の手順に従い、同じ Chart 内に生の `ApiObject` として
+追加すること。
 
 ## HTTPRoute を追加する（外部公開が必要な場合）
 

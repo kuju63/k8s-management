@@ -13,6 +13,9 @@ export const MANIFESTS_PATH = "manifests";
 /** ArgoCD がインストールされる namespace。 */
 export const ARGOCD_NAMESPACE = "argocd";
 
+/** createContainerApplication が内部でラップする汎用 Helm チャート（コンテナ実行用）。 */
+export const APP_TEMPLATE_REPO_URL = "oci://ghcr.io/bjw-s-labs/helm/app-template";
+
 /** 運用系UIを公開する際の共通ドメインサフィックス。 */
 export const CLUSTER_DOMAIN = "home.local";
 
