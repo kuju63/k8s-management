@@ -8,6 +8,9 @@ directory source・`recurse: true` で直接 watch している。そのため�
 も個別の ArgoCD Application でラップせず、対象 namespace の Chart に直接
 追加すればよい（詳細は [jobs.md](./jobs.md) の概要を参照）。
 
+作成した ConfigMap / Secret を削除する場合の手順は
+[resource-deletion.md](./resource-deletion.md) を参照。
+
 ## ConfigMap のサンプル
 
 [jobs.md](./jobs.md) の `ExampleBatchChart` に含まれている例（再掲）。

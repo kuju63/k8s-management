@@ -14,6 +14,9 @@ source・`recurse: true` で直接 watch している。そのため CronJob / J
 生の CRD（`IPAddressPool` 等）を同じ Chart 内に混在させている。これと
 同じ要領で、対象 namespace の Chart に直接追加すればよい。
 
+作成した CronJob / Job を削除する場合の手順は
+[resource-deletion.md](./resource-deletion.md) を参照。
+
 ## CronJob のサンプル
 
 新規 namespace の Chart 全体の例。Pod テンプレートは可読性のため

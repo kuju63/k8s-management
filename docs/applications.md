@@ -16,6 +16,9 @@
 HTTPRoute（Gateway API）は ArgoCD Application とは別のリソース。公開したい
 Service を持つ namespace の Chart 内に、生の `ApiObject` として追加する。
 
+作成した Application を削除する場合の手順は
+[resource-deletion.md](./resource-deletion.md) を参照。
+
 ## `createHelmApplication` で Helm チャートを追加する
 
 `packages/ns/metallb-system/index.ts` のように、Helm チャートをそのまま
