@@ -8,7 +8,11 @@
     "prepare": "husky",
     "compile": "tsc --build",
     "synth": "pnpm compile && node dist/main.js synth",
-    "apply": "pnpm compile && node dist/main.js apply"
+    "apply": "pnpm compile && node dist/main.js apply",
+    "format": "pnpx @biomejs/biome format --write .",
+    "format:check": "pnpx @biomejs/biome format .",
+    "lint": "pnpx @biomejs/biome lint",
+    "lint:fix": "pnpx @biomejs/biome lint --write"
   },
   "keywords": [],
   "author": "",
