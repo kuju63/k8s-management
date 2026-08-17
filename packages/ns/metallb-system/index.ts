@@ -11,35 +11,35 @@ const POOL_NAME = "lan-pool";
  * LANクライアントへ LoadBalancer IP を払い出す MetalLB を配置する。
  */
 export class MetallbSystemChart extends Chart {
-    constructor(scope: App) {
-        super(scope, NAMESPACE);
+  constructor( scope: App ) {
+    super( scope, NAMESPACE );
 
-        createNamespace(this, NAMESPACE);
+    createNamespace( this, NAMESPACE );
 
-        createHelmApplication(this, "argocd-application", {
-            name: "metallb",
-            namespace: NAMESPACE,
-            repoUrl: "https://metallb.github.io/metallb",
-            chart: "metallb",
-            targetRevision: "0.16.1",
-        });
+    createHelmApplication( this, "argocd-application", {
+      name: "metallb",
+      namespace: NAMESPACE,
+      repoUrl: "https://metallb.github.io/metallb",
+      chart: "metallb",
+      targetRevision: "0.16.1",
+    } );
 
-        new ApiObject(this, "ip-address-pool", {
-            apiVersion: "metallb.io/v1beta1",
-            kind: "IPAddressPool",
-            metadata: { name: POOL_NAME, namespace: NAMESPACE },
-            spec: {
-                addresses: [METALLB_ADDRESS_RANGE],
-            },
-        });
+    new ApiObject( this, "ip-address-pool", {
+      apiVersion: "metallb.io/v1beta1",
+      kind: "IPAddressPool",
+      metadata: { name: POOL_NAME, namespace: NAMESPACE },
+      spec: {
+        addresses: [ METALLB_ADDRESS_RANGE ],
+      },
+    } );
 
-        new ApiObject(this, "l2-advertisement", {
-            apiVersion: "metallb.io/v1beta1",
-            kind: "L2Advertisement",
-            metadata: { name: "lan-l2", namespace: NAMESPACE },
-            spec: {
-                ipAddressPools: [POOL_NAME],
-            },
-        });
-    }
+    new ApiObject( this, "l2-advertisement", {
+      apiVersion: "metallb.io/v1beta1",
+      kind: "L2Advertisement",
+      metadata: { name: "lan-l2", namespace: NAMESPACE },
+      spec: {
+        ipAddressPools: [ POOL_NAME ],
+      },
+    } );
+  }
 }

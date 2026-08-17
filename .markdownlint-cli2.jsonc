@@ -1,6 +1,3 @@
 {
-  "ignores": [
-    "node_modules",
-    ".claude/skills/helm-chart-version-check"
-  ]
+  "ignores": [ "node_modules", ".claude/skills/helm-chart-version-check" ]
 }

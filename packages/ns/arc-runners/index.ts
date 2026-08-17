@@ -9,28 +9,28 @@ const NAMESPACE = "arc-runners";
  * ジョブ毎に ARC Controller（ns: actions-runner-system）が生成・破棄する Runner Pod の scale set。
  */
 export class ArcRunnersChart extends Chart {
-    constructor(scope: App) {
-        super(scope, NAMESPACE);
+  constructor( scope: App ) {
+    super( scope, NAMESPACE );
 
-        createNamespace(this, NAMESPACE);
+    createNamespace( this, NAMESPACE );
 
-        // githubConfigUrl/githubConfigSecret は対象リポジトリ・組織が未確定のため TODO。
-        // githubConfigSecret はここでは平文Secretを作らず、事前に kubectl 等で作成済みのSecret名を指す想定。
-        // targetRevision: 2026-08-13 時点の ghcr.io actions-runner-controller-charts 最新版。
-        // actions-runner-system の gha-runner-scale-set-controller と同じバージョンで揃える。
-        createHelmApplication(this, "argocd-application", {
-            name: "arc-runners",
-            namespace: NAMESPACE,
-            repoUrl: "oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set",
-            targetRevision: "0.14.2",
-            valuesObject: {
-                githubConfigUrl: "https://github.com/TODO-org/TODO-repo",
-                githubConfigSecret: "TODO-github-config-secret",
-                controllerServiceAccount: {
-                    namespace: "actions-runner-system",
-                    name: "arc-controller-gha-rs-controller",
-                },
-            },
-        });
-    }
+    // githubConfigUrl/githubConfigSecret は対象リポジトリ・組織が未確定のため TODO。
+    // githubConfigSecret はここでは平文Secretを作らず、事前に kubectl 等で作成済みのSecret名を指す想定。
+    // targetRevision: 2026-08-13 時点の ghcr.io actions-runner-controller-charts 最新版。
+    // actions-runner-system の gha-runner-scale-set-controller と同じバージョンで揃える。
+    createHelmApplication( this, "argocd-application", {
+      name: "arc-runners",
+      namespace: NAMESPACE,
+      repoUrl: "oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set",
+      targetRevision: "0.14.2",
+      valuesObject: {
+        githubConfigUrl: "https://github.com/TODO-org/TODO-repo",
+        githubConfigSecret: "TODO-github-config-secret",
+        controllerServiceAccount: {
+          namespace: "actions-runner-system",
+          name: "arc-controller-gha-rs-controller",
+        },
+      },
+    } );
+  }
 }

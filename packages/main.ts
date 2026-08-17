@@ -9,22 +9,22 @@ import { MetallbSystemChart } from "./ns/metallb-system/index.js";
 import { MonitoringChart } from "./ns/monitoring/index.js";
 
 function buildApp(): App {
-    const app = new App({ outdir: MANIFESTS_PATH });
+  const app = new App( { outdir: MANIFESTS_PATH } );
 
-    new MetallbSystemChart(app);
-    new EnvoyGatewaySystemChart(app);
-    new ArgocdChart(app);
-    new ActionsRunnerSystemChart(app);
-    new ArcRunnersChart(app);
-    new MonitoringChart(app);
+  new MetallbSystemChart( app );
+  new EnvoyGatewaySystemChart( app );
+  new ArgocdChart( app );
+  new ActionsRunnerSystemChart( app );
+  new ArcRunnersChart( app );
+  new MonitoringChart( app );
 
-    return app;
+  return app;
 }
 
 /** 全 namespace 分の manifest を {@link MANIFESTS_PATH} 配下に synth する。 */
 export function synth(): string {
-    buildApp().synth();
-    return MANIFESTS_PATH;
+  buildApp().synth();
+  return MANIFESTS_PATH;
 }
 
 /**
@@ -36,23 +36,23 @@ export function synth(): string {
  * 複数回 apply が必要になる場合がある。
  */
 export function apply(): void {
-    synth();
-    execFileSync("kubectl", ["apply", "-R", "-f", MANIFESTS_PATH], { stdio: "inherit" });
+  synth();
+  execFileSync( "kubectl", [ "apply", "-R", "-f", MANIFESTS_PATH ], { stdio: "inherit" } );
 }
 
 function main(): void {
-    const command = process.argv[2] ?? "synth";
+  const command = process.argv[ 2 ] ?? "synth";
 
-    if (command === "apply") {
-        apply();
-    } else if (command === "synth") {
-        synth();
-    } else {
-        console.error(`unknown command: ${command} (expected "synth" or "apply")`);
-        process.exitCode = 1;
-    }
+  if ( command === "apply" ) {
+    apply();
+  } else if ( command === "synth" ) {
+    synth();
+  } else {
+    console.error( `unknown command: ${ command } (expected "synth" or "apply")` );
+    process.exitCode = 1;
+  }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-    main();
+if ( import.meta.url === `file://${ process.argv[ 1 ] }` ) {
+  main();
 }

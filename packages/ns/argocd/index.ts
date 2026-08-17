@@ -18,43 +18,43 @@ const NAMESPACE = ARGOCD_NAMESPACE;
  * このコード単体では 1. 2. を自動化できない（ノート内「初回ブートストラップは手動」の記述どおり）。
  */
 export class ArgocdChart extends Chart {
-    constructor(scope: App) {
-        super(scope, NAMESPACE);
+  constructor( scope: App ) {
+    super( scope, NAMESPACE );
 
-        createNamespace(this, NAMESPACE);
+    createNamespace( this, NAMESPACE );
 
-        createDirectoryApplication(this, "app-of-apps", {
-            name: "app-of-apps",
-            namespace: NAMESPACE,
-            path: MANIFESTS_PATH,
-            recurse: true,
-        });
+    createDirectoryApplication( this, "app-of-apps", {
+      name: "app-of-apps",
+      namespace: NAMESPACE,
+      path: MANIFESTS_PATH,
+      recurse: true,
+    } );
 
-        // ArgoCD 自身の以後のアップグレードを ArgoCD 自身に管理させる（self-managing）。
-        // targetRevision: 2026-08-13 時点の argo-helm/argo-cd チャート最新版。
-        createHelmApplication(this, "argocd-self", {
-            name: "argocd",
-            namespace: NAMESPACE,
-            repoUrl: "https://argoproj.github.io/argo-helm",
-            chart: "argo-cd",
-            targetRevision: "10.3.3",
-        });
+    // ArgoCD 自身の以後のアップグレードを ArgoCD 自身に管理させる（self-managing）。
+    // targetRevision: 2026-08-13 時点の argo-helm/argo-cd チャート最新版。
+    createHelmApplication( this, "argocd-self", {
+      name: "argocd",
+      namespace: NAMESPACE,
+      repoUrl: "https://argoproj.github.io/argo-helm",
+      chart: "argo-cd",
+      targetRevision: "10.3.3",
+    } );
 
-        // 運用系UIへの経路（ノートでは点線＝要認証として明示）。
-        // 認証（BasicAuth/OAuth2 Proxy等）の付与は Envoy Gateway の SecurityPolicy 等で別途行う想定で、今回はスコープ外。
-        new ApiObject(this, "httproute", {
-            apiVersion: "gateway.networking.k8s.io/v1",
-            kind: "HTTPRoute",
-            metadata: { name: "argocd", namespace: NAMESPACE },
-            spec: {
-                parentRefs: [{ name: GATEWAY_NAME, namespace: GATEWAY_NAMESPACE }],
-                hostnames: [`argocd.${CLUSTER_DOMAIN}`],
-                rules: [
-                    {
-                        backendRefs: [{ name: "argocd-server", port: 80 }],
-                    },
-                ],
-            },
-        });
-    }
+    // 運用系UIへの経路（ノートでは点線＝要認証として明示）。
+    // 認証（BasicAuth/OAuth2 Proxy等）の付与は Envoy Gateway の SecurityPolicy 等で別途行う想定で、今回はスコープ外。
+    new ApiObject( this, "httproute", {
+      apiVersion: "gateway.networking.k8s.io/v1",
+      kind: "HTTPRoute",
+      metadata: { name: "argocd", namespace: NAMESPACE },
+      spec: {
+        parentRefs: [ { name: GATEWAY_NAME, namespace: GATEWAY_NAMESPACE } ],
+        hostnames: [ `argocd.${ CLUSTER_DOMAIN }` ],
+        rules: [
+          {
+            backendRefs: [ { name: "argocd-server", port: 80 } ],
+          },
+        ],
+      },
+    } );
+  }
 }
