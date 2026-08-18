@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "pnpx vitest",
     "prepare": "husky",
     "compile": "tsc --build",
     "synth": "pnpm compile && node dist/main.js synth",
@@ -26,8 +26,9 @@
   },
   "type": "module",
   "devDependencies": {
+    "@biomejs/biome": "^2.5.8",
     "@types/node": "^26.2.0",
-    "biome": "^0.3.3",
+    "@vitest/coverage-v8": "^4.1.10",
     "husky": "^9.1.7",
     "lint-staged": "^17.3.0",
     "markdownlint-cli2": "^0.23.2",
@@ -35,7 +36,9 @@
     "textlint-filter-rule-allowlist": "^4.0.0",
     "textlint-filter-rule-comments": "^1.3.0",
     "textlint-rule-preset-ja-technical-writing": "^12.0.2",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "cdk8s": "^2.70.91"
