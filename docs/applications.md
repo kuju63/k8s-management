@@ -19,6 +19,12 @@
 HTTPRoute（Gateway API）は ArgoCD Application とは別のリソース。公開したい
 Service を持つ namespace の Chart 内に、生の `ApiObject` として追加する。
 
+`packages/lib/batch-job.ts` のヘルパー（`createCronJob` / `createJob`）で
+`CronJob` / `Job` リソースも作成できる。この2つには ArgoCD Application
+でラップする必要なく、直接 `ApiObject` として生成される。`createHelmApplication`
+等のヘルパーが作成する `Application` リソースは別のリソース。`createCronJob`
+`createJob` は `CronJob` / `Job` リソースを生成するものにすぎない。
+
 作成した Application を削除する場合の手順は
 [resource-deletion.md](./resource-deletion.md) を参照。
 

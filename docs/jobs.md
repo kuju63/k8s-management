@@ -2,17 +2,20 @@
 
 ## 概要
 
-CronJob / Job には Application 用のような専用ヘルパーは無く、生の
-`ApiObject` で直接記述する。cdk8s の型付き import（`cdk8s-plus-*` や
-`cdk8s import` による `imports/`）はこのリポジトリに導入されていない。
-そのため `apiVersion` / `kind` / `spec` をそのまま渡す形になる。
+`packages/lib/batch-job.ts` の `createCronJob` / `createJob` ヘルパーで
+CronJob / Job リソースを生成する。
 
-ArgoCD の root Application（`app-of-apps`）は `manifests/` を directory
-source・`recurse: true` で直接 watch している。そのため CronJob / Job の
-ような素の Kubernetes リソースを、個別の ArgoCD Application でラップする
-必要はない。`packages/ns/metallb-system/index.ts` は Helm Application と
-生の CRD（`IPAddressPool` 等）を同じ Chart 内に混在させている。これと
-同じ要領で、対象 namespace の Chart に直接追加すればよい。
+cdk8s の型付き import（`cdk8s-plus-*` や `cdk8s import` による
+`imports/`）はこのリポジトリに導入されていない。
+コンテナ仕様として`args`や`command`等を定義する場合がある。
+
+ArgoCD の root Application（`app-of-apps`）は
+`manifests/` を directory source・`recurse: true` で直接 watch している。
+`packages/ns/<namespace>/index.ts` にヘルパーを呼び出すように追記すれば、
+synth 時に `manifests/<namespace>.k8s.yaml` が更新される。
+ArgoCD が自動的に sync を実行する。
+`packages/ns/metallb-system/index.ts` のように生 `ApiObject` を Chart 内で
+混在させて書くこともできる。
 
 作成した CronJob / Job を削除する場合の手順は
 [resource-deletion.md](./resource-deletion.md) を参照。
@@ -23,27 +26,19 @@ source・`recurse: true` で直接 watch している。そのため CronJob / J
 コンストラクタの外で `const` に切り出すスタイルを基本とする。
 
 ```ts
-import { type App, ApiObject, Chart } from "cdk8s";
+import { type App, Chart } from "cdk8s";
 import { createNamespace } from "../../lib/namespace.js";
+import { createCronJob } from "../../lib/batch-job.js";
 
 const NAMESPACE = "example-batch";
 
-const cleanupPodSpec = {
-    restartPolicy: "OnFailure",
-    containers: [
-        {
-            name: "cleanup",
-            image: "example.registry/cleanup:1.0.0",
-            command: ["/bin/sh", "-c", "echo cleanup"],
-            envFrom: [
-                { configMapRef: { name: "app-config" } },
-                // app-secret はコードで作らず、事前に kubectl 等で作成し
-                // ておく（詳細は config-and-secrets.md を参照）。
-                { secretRef: { name: "app-secret" } },
-            ],
-        },
-    ],
-};
+const cleanupPodSpec = [
+    {
+        name: "cleanup",
+        image: "example.registry/cleanup:1.0.0",
+        command: ["/bin/sh", "-c", "echo cleanup"],
+    },
+];
 
 export class ExampleBatchChart extends Chart {
     constructor(scope: App) {
@@ -51,34 +46,12 @@ export class ExampleBatchChart extends Chart {
 
         createNamespace(this, NAMESPACE);
 
-        // CronJob/Job から envFrom で参照する ConfigMap
-        // （詳細は config-and-secrets.md を参照）。
-        new ApiObject(this, "configmap-example", {
-            apiVersion: "v1",
-            kind: "ConfigMap",
-            metadata: { name: "app-config", namespace: NAMESPACE },
-            data: {
-                LOG_LEVEL: "info",
-                FEATURE_FLAG_X: "true",
-            },
-        });
-
-        new ApiObject(this, "cronjob-example", {
-            apiVersion: "batch/v1",
-            kind: "CronJob",
-            metadata: { name: "nightly-cleanup", namespace: NAMESPACE },
-            spec: {
-                schedule: "0 3 * * *",
-                concurrencyPolicy: "Forbid",
-                successfulJobsHistoryLimit: 3,
-                failedJobsHistoryLimit: 1,
-                jobTemplate: {
-                    spec: {
-                        backoffLimit: 2,
-                        template: { spec: cleanupPodSpec },
-                    },
-                },
-            },
+        createCronJob(this, "cronjob-example", {
+            namespace: NAMESPACE,
+            schedule: "0 3 * * *",
+            successfulJobsHistoryLimit: 3,
+            failedJobsHistoryLimit: 1,
+            containers: cleanupPodSpec,
         });
     }
 }
@@ -92,25 +65,18 @@ export class ExampleBatchChart extends Chart {
 単発実行のバッチ処理。上記と同じ Chart 内に追記する形。
 
 ```ts
-const migratePodSpec = {
-    restartPolicy: "Never",
-    containers: [
-        {
-            name: "migrate",
-            image: "example.registry/migrate:1.0.0",
-            args: ["migrate", "up"],
-        },
-    ],
-};
-
-new ApiObject(this, "job-example", {
-    apiVersion: "batch/v1",
-    kind: "Job",
-    metadata: { name: "migrate-db", namespace: NAMESPACE },
-    spec: {
-        backoffLimit: 3,
-        template: { spec: migratePodSpec },
+const migratePodSpec = [
+    {
+        name: "migrate",
+        image: "example.registry/migrate:1.0.0",
+        args: ["migrate", "up"],
     },
+];
+
+createJob(this, "job-example", {
+    namespace: NAMESPACE,
+    backoffLimit: 3,
+    containers: migratePodSpec,
 });
 ```
 
