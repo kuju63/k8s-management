@@ -21,12 +21,28 @@ export interface HelmApplicationProps {
 
 /** upstream の Helm チャートを source とする ArgoCD Application を生成する。 */
 export function createHelmApplication( chart: Chart, id: string, props: HelmApplicationProps ): ApiObject {
+  let repoURL = props.repoUrl;
+  let chartName = props.chart;
+
+  // ArgoCD の Helm OCI ソースは、oci:// を除いた repoURL(レジストリのパス) と
+  // chart(チャート名) の両方を要求する（chart 未指定だと "spec.source.repoURL and
+  // either spec.source.path or spec.source.chart are required" となり InvalidSpecError になる）。
+  // 呼び出し側では OCI URL にチャート名まで含めるため、末尾セグメントを chart へ切り出す。
+  if ( repoURL.startsWith( "oci://" ) ) {
+    repoURL = repoURL.slice( "oci://".length );
+    if ( chartName === undefined ) {
+      const lastSlashIndex = repoURL.lastIndexOf( "/" );
+      chartName = repoURL.slice( lastSlashIndex + 1 );
+      repoURL = repoURL.slice( 0, lastSlashIndex );
+    }
+  }
+
   const source: Record< string, unknown > = {
-    repoURL: props.repoUrl,
+    repoURL,
     targetRevision: props.targetRevision,
   };
-  if ( props.chart !== undefined ) {
-    source.chart = props.chart;
+  if ( chartName !== undefined ) {
+    source.chart = chartName;
   }
   if ( props.valuesObject !== undefined ) {
     source.helm = { valuesObject: props.valuesObject };
