@@ -14,8 +14,8 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    chart: metallb
-    repoURL: https://metallb.github.io/metallb
+    chart: metallb-native.yaml
+    repoURL: https://github.com/metallb/metallb
     targetRevision: 0.16.1
   syncPolicy:
     automated:

@@ -19,8 +19,8 @@ export class MetallbSystemChart extends Chart {
     createHelmApplication( this, "argocd-application", {
       name: "metallb",
       namespace: NAMESPACE,
-      repoUrl: "https://metallb.github.io/metallb",
-      chart: "metallb",
+      repoUrl: "https://github.com/metallb/metallb",
+      chart: "metallb-native.yaml",
       targetRevision: "0.16.1",
     } );
 
