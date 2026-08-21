@@ -20,6 +20,7 @@
             pnpm
             betterleaks
             kubectl
+            kubernetes-helm
           ];
 
           shellHook = ''
