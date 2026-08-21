@@ -64,6 +64,10 @@ export class ExampleHelmAppChart extends Chart {
 （`repoUrl` 自体にチャート名まで含まれるため）。`valuesObject` を省略すると
 チャートのデフォルト値がそのまま使われる。
 
+生成される Application は `ServerSideApply=true` を使用する。
+これにより、大きな CRD が client-side apply の
+`last-applied-configuration` annotation サイズ上限を超える問題を回避する。
+
 HTTPRoute を持たないこのパターンは、MetalLB のようにクラスタ内部の
 インフラ機能を提供するだけで、外部からのルーティングが不要な場合に使う。
 

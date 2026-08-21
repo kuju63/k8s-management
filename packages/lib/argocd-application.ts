@@ -61,6 +61,8 @@ export function createHelmApplication( chart: Chart, id: string, props: HelmAppl
       },
       syncPolicy: {
         automated: { prune: true, selfHeal: true },
+        // 大きな CRD で last-applied-configuration annotation の 256 KiB 上限を超えないようにする。
+        syncOptions: [ "ServerSideApply=true" ],
       },
     },
   } );

@@ -21,6 +21,8 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
 ---
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
