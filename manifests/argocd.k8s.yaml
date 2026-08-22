@@ -57,7 +57,7 @@ metadata:
   namespace: argocd
 spec:
   hostnames:
-    - argocd.home.local
+    - argocd.home.internal
   parentRefs:
     - name: home-gateway
       namespace: envoy-gateway-system

@@ -175,7 +175,7 @@ metadata:
   namespace: monitoring
 spec:
   hostnames:
-    - grafana.home.local
+    - grafana.home.internal
   parentRefs:
     - name: home-gateway
       namespace: envoy-gateway-system

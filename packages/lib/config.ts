@@ -16,7 +16,7 @@ export const ARGOCD_NAMESPACE = "argocd";
 export const APP_TEMPLATE_REPO_URL = "oci://ghcr.io/bjw-s-labs/helm/app-template";
 
 /** 運用系UIを公開する際の共通ドメインサフィックス。 */
-export const CLUSTER_DOMAIN = "home.local";
+export const CLUSTER_DOMAIN = "home.internal";
 
 /** Envoy Gateway が持つ共有 Gateway の名前・namespace。各 HTTPRoute の parentRefs から参照する。 */
 export const GATEWAY_NAME = "home-gateway";
