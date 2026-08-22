@@ -36,6 +36,11 @@ spec:
   project: default
   source:
     chart: argo-cd
+    helm:
+      valuesObject:
+        configs:
+          params:
+            server.insecure: true
     repoURL: https://argoproj.github.io/argo-helm
     targetRevision: 10.3.3
   syncPolicy:

@@ -38,6 +38,11 @@ export class ArgocdChart extends Chart {
       repoUrl: "https://argoproj.github.io/argo-helm",
       chart: "argo-cd",
       targetRevision: "10.3.3",
+      valuesObject: {
+        configs: {
+          params: { "server.insecure": true },
+        },
+      },
     } );
 
     // 運用系UIへの経路（ノートでは点線＝要認証として明示）。
