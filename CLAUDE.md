@@ -51,8 +51,11 @@ devShell（`direnv` 経由で `flake.nix` を自動読み込み。手動なら `
 
 ### `packages/lib/` のヘルパー
 
-`packages/lib/argocd-application.ts` が ArgoCD `Application` リソースを生成する4つの関数を提供する
+`packages/lib/argocd-application.ts` が ArgoCD `Application` リソースを生成する4つの関数を提供する。
+`packages/lib/argocd-applicationset.ts` は、複数の Application を管理する `ApplicationSet` 用の2関数を提供する
 （詳細と使い分けは [docs/applications.md](docs/applications.md)）。
+
+Application:
 
 - `createHelmApplication`
   upstream Helm チャートを source にする。最も基本的なパターン
@@ -65,8 +68,15 @@ devShell（`direnv` 経由で `flake.nix` を自動読み込み。手動なら `
 - `createContainerApplication`
   コンテナイメージから直接 Deployment/Service を作る。内部でbjw-s-labs/app-template という汎用 Helm チャートを `createHelmApplication` 経由でラップしており、呼び出し側は Helm チャートの存在を意識しなくてよい。`targetRevision` はこのラッパーの中ではapp-template チャート自体のバージョンを指す点に注意（アプリのバージョンは `image.tag` 側）
 
-これら4関数が生成する Application はすべて `syncPolicy.automated.prune: true` /
-`selfHeal: true` が固定。**コード上の定義を削除して push することが、リソース削除の唯一の正規手順**（`kubectl delete` を単体で行っても selfHeal で復活する）。詳細は[docs/resource-deletion.md](docs/resource-deletion.md)。
+ApplicationSet:
+
+- `createHelmApplicationSet`
+  複数の Helm Application を List generator で生成する。個別の `valuesObject` は `templatePatch` で反映する
+- `createApplicationSet`
+  任意の generator/template を宣言する低レベルヘルパー
+
+Application ヘルパー4関数と、`createHelmApplicationSet` が生成する Application はすべて
+`syncPolicy.automated.prune: true` / `selfHeal: true` が固定。**コード上の定義を削除して push することが、リソース削除の唯一の正規手順**（`kubectl delete` を単体で行っても selfHeal で復活する）。詳細は[docs/resource-deletion.md](docs/resource-deletion.md)。
 
 `packages/lib/namespace.ts` の `createNamespace` は Namespace リソースを1個作るだけの薄いヘルパー。
 CronJob/Job/ConfigMap/HTTPRoute 等、専用ヘルパーの無いリソースは cdk8s の生の `ApiObject` で直接記述する（各 Chart の実装例を参照）。
@@ -104,4 +114,4 @@ ArgoCD 自体はこのリポジトリのコードだけでは導入できない�
 ## Skills
 
 `.claude/skills/helm-chart-version-check/`
-  `packages/ns/**/index.ts` 内の `createHelmApplication(...)`呼び出しの `targetRevision` を実際の Helm リポジトリ/OCI レジストリの最新版と比較し、パッチ/マイナー更新は自動反映、メジャー更新は警告コメント挿入に留めるプロジェクトスキル。`createContainerApplication`経由の呼び出しは文字列マッチの都合で検出対象外。
+  `packages/ns/**/index.ts` 内の `createHelmApplication(...)`呼び出しの `targetRevision` を実際の Helm リポジトリ/OCI レジストリの最新版と比較し、パッチ/マイナー更新は自動反映、メジャー更新は警告コメント挿入に留めるプロジェクトスキル。`createContainerApplication`と`createHelmApplicationSet`経由の呼び出しは文字列マッチの都合で検出対象外。

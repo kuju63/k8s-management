@@ -3,11 +3,18 @@
 ## 概要
 
 `packages/lib/argocd-application.ts` には、ArgoCD `Application` を生成する
-3つのヘルパー関数がある。
+4つのヘルパー関数がある。
 
 - `createHelmApplication`
 - `createGitApplication`
 - `createDirectoryApplication`
+- `createContainerApplication`
+
+`packages/lib/argocd-applicationset.ts` には、複数の Application を管理する
+`ApplicationSet` を生成する2つのヘルパー関数がある。
+
+- `createHelmApplicationSet`
+- `createApplicationSet`
 
 これらが生成する Application は、すべて次の syncPolicy を持つ。
 
@@ -143,6 +150,24 @@ Helm ベースの Application
 
 ArgoCD がその Application を prune すると、Application 配下で Helm
 チャートがインストールしていたリソース群も連鎖的に削除される。
+
+## ApplicationSet が管理する Application を削除する
+
+`applications` から要素を削除すると、ApplicationSet controller が変更を検知する。
+`createHelmApplicationSet` で生成した対応する Application は削除される。デフォルトでは、
+生成 Application に ArgoCD の resource finalizer が付く。その Application が
+デプロイした Deployment、Service、ConfigMap なども連鎖的に削除される。
+
+ApplicationSet 自体をコードから削除した場合も、生成済みの Application が削除される。
+これは owner reference による動作であり、配下のリソースも削除される。
+通常の Application と同様に、コードから対象定義を削除することが正規手順となる。
+synth した manifest を commit・push して反映する。
+
+配下のリソースを残して ApplicationSet だけを削除する必要がある場合は、
+`preserveResourcesOnDeletion: true` を作成時に指定する。この設定により、
+Application に resource finalizer が付かなくなる。通常運用ではデフォルトの
+`false` を使用すること。安易に有効化すると、ArgoCD の管理外となったリソースが
+クラスタに残るため注意する。
 
 ## デプロイ（削除の反映）までの手順
 

@@ -3,6 +3,39 @@ import { APP_TEMPLATE_REPO_URL, ARGOCD_NAMESPACE, GIT_REPO_URL, GIT_TARGET_REVIS
 
 const DESTINATION_SERVER = "https://kubernetes.default.svc";
 
+/** ArgoCD の Helm source で使用する正規化済みリポジトリ情報。 */
+export interface NormalizedHelmSource {
+  readonly repoURL: string;
+  readonly chart?: string;
+}
+
+/**
+ * Helm リポジトリURLを ArgoCD の Helm source 形式へ正規化する。
+ * OCI URL は `oci://` を除去し、URL 末尾のチャート名を `chart` に切り出す。
+ */
+export function normalizeHelmSource( repoUrl: string, chart?: string ): NormalizedHelmSource {
+  let repoURL = repoUrl;
+  let chartName = chart;
+
+  // ArgoCD の Helm OCI ソースは、oci:// を除いた repoURL(レジストリのパス) と
+  // chart(チャート名) の両方を要求する（chart 未指定だと "spec.source.repoURL and
+  // either spec.source.path or spec.source.chart are required" となり InvalidSpecError になる）。
+  // 呼び出し側では OCI URL にチャート名まで含めるため、末尾セグメントを chart へ切り出す。
+  if ( repoURL.startsWith( "oci://" ) ) {
+    repoURL = repoURL.slice( "oci://".length );
+    if ( chartName === undefined ) {
+      const lastSlashIndex = repoURL.lastIndexOf( "/" );
+      chartName = repoURL.slice( lastSlashIndex + 1 );
+      repoURL = repoURL.slice( 0, lastSlashIndex );
+    }
+  }
+
+  if ( chartName === undefined ) {
+    return { repoURL };
+  }
+  return { repoURL, chart: chartName };
+}
+
 /** `createHelmApplication` のプロパティ。 */
 export interface HelmApplicationProps {
   /** ArgoCD Application 名（= リソース名）。 */
@@ -21,28 +54,13 @@ export interface HelmApplicationProps {
 
 /** upstream の Helm チャートを source とする ArgoCD Application を生成する。 */
 export function createHelmApplication( chart: Chart, id: string, props: HelmApplicationProps ): ApiObject {
-  let repoURL = props.repoUrl;
-  let chartName = props.chart;
-
-  // ArgoCD の Helm OCI ソースは、oci:// を除いた repoURL(レジストリのパス) と
-  // chart(チャート名) の両方を要求する（chart 未指定だと "spec.source.repoURL and
-  // either spec.source.path or spec.source.chart are required" となり InvalidSpecError になる）。
-  // 呼び出し側では OCI URL にチャート名まで含めるため、末尾セグメントを chart へ切り出す。
-  if ( repoURL.startsWith( "oci://" ) ) {
-    repoURL = repoURL.slice( "oci://".length );
-    if ( chartName === undefined ) {
-      const lastSlashIndex = repoURL.lastIndexOf( "/" );
-      chartName = repoURL.slice( lastSlashIndex + 1 );
-      repoURL = repoURL.slice( 0, lastSlashIndex );
-    }
-  }
-
+  const normalizedSource = normalizeHelmSource( props.repoUrl, props.chart );
   const source: Record< string, unknown > = {
-    repoURL,
+    repoURL: normalizedSource.repoURL,
     targetRevision: props.targetRevision,
   };
-  if ( chartName !== undefined ) {
-    source.chart = chartName;
+  if ( normalizedSource.chart !== undefined ) {
+    source.chart = normalizedSource.chart;
   }
   if ( props.valuesObject !== undefined ) {
     source.helm = { valuesObject: props.valuesObject };

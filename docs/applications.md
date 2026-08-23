@@ -4,7 +4,7 @@
 
 このリポジトリは cdk8s + ArgoCD の App-of-Apps パターンで構成されている。
 `packages/lib/argocd-application.ts` に、ArgoCD の `Application` リソースを
-生成するヘルパー関数が3つ用意されている。
+生成するヘルパー関数が4つ用意されている。
 
 - `createHelmApplication` — upstream の Helm チャートを source にする
 - `createGitApplication` — 任意の git リポジトリのディレクトリを source にする
@@ -15,6 +15,12 @@
 - `createContainerApplication` — コンテナイメージから直接 Deployment/Service
   を作る。内部で bjw-s-labs/app-template という汎用 Helm チャートをラップ
   しており、Helm チャートを自作せずに単一コンテナのアプリを追加できる
+
+`packages/lib/argocd-applicationset.ts` には、`ApplicationSet` 用の
+ヘルパー関数が2つ用意されている。これらは複数の Application を自動生成・管理する。
+
+- `createHelmApplicationSet` — 複数の Helm Application を List generator で管理する
+- `createApplicationSet` — 任意の generator と Application template を指定する
 
 HTTPRoute（Gateway API）は ArgoCD Application とは別のリソース。公開したい
 Service を持つ namespace の Chart 内に、生の `ApiObject` として追加する。
@@ -160,6 +166,56 @@ bjw-s-labs/app-template チャート自体のバージョンであり、デプ�
 Ingress/HTTPRoute はこのヘルパーの対象外。外部公開が必要な場合は次項の
 「HTTPRoute を追加する」の手順に従い、同じ Chart 内に生の `ApiObject` として
 追加すること。
+
+## `createHelmApplicationSet` で複数の Helm Application を管理する
+
+同じ namespace に複数の Helm チャートを導入する場合は、
+`createHelmApplicationSet` を使用できる。個別の `createHelmApplication` 呼び出しを
+並べる代わりに、List generator の各要素から1つずつ Application を生成する。
+
+```ts
+import { createHelmApplicationSet } from "../../lib/argocd-applicationset.js";
+
+createHelmApplicationSet(this, "observability-applications", {
+    name: "observability",
+    namespace: NAMESPACE,
+    applications: [
+        {
+            name: "metrics-server",
+            repoUrl: "https://kubernetes-sigs.github.io/metrics-server/",
+            chart: "metrics-server",
+            targetRevision: "3.13.0",
+        },
+        {
+            name: "example-oci-app",
+            repoUrl: "oci://ghcr.io/example-org/charts/example-app",
+            targetRevision: "1.2.3",
+            valuesObject: {
+                replicaCount: 2,
+            },
+        },
+    ],
+});
+```
+
+`repoUrl` と `chart` の指定方法は `createHelmApplication` と同じ。通常の Helm
+リポジトリでは `chart` が必須となる。OCI URL ではチャート名を含む `repoUrl` を
+渡せば `chart` を省略できる。
+
+ApplicationSet の通常のテンプレート置換は文字列型フィールドに限られる。
+このため、オブジェクトである `valuesObject` は Go template の `templatePatch` を
+使って各 Application へ反映している。入力にはコード内で定義した値だけを使用すること。
+外部から受け取った未検証の値を入れてはいけない。
+
+生成される Application では、`prune: true` と `selfHeal: true` が有効になる。
+`ServerSideApply=true` も有効になる。ApplicationSet の要素を削除すると、対応する
+Application とその管理リソースも削除される。変更前に対象を必ず確認すること。
+
+List generator 以外の cluster、git、matrix などを使う場合は、低レベルヘルパーの
+`createApplicationSet` を使う。`generators` と `template` を直接指定できる。
+generator 固有のフィールドは `Record<string, unknown>` として渡す。ArgoCD の
+[ApplicationSet ドキュメント](https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/)
+で、使用中の ArgoCD バージョンに対応する仕様を確認すること。
 
 ## HTTPRoute を追加する（外部公開が必要な場合）
 

@@ -11,9 +11,9 @@ description: >-
   「envoy-gatewayの最新版と比較して」のように言った場合は必ずこのスキルを使うこと。
   createGitApplication（targetRevision: "main" 固定のGitソース）や
   createDirectoryApplication は対象外。createContainerApplication（内部で
-  createHelmApplication をラップするコンテナ用ヘルパー）も、呼び出し側コードに
-  createHelmApplication(...) という文字列が現れないため現状のスキャナでは
-  検出できず対象外。
+  createHelmApplication をラップするコンテナ用ヘルパー）と createHelmApplicationSet
+  （List generator で複数のHelm Applicationを生成するヘルパー）も、呼び出し側コードに
+  createHelmApplication(...) という文字列が現れないため現状のスキャナでは検出できず対象外。
 ---
 <!-- markdownlint-disable -->
 # Helm チャートバージョンチェック
@@ -25,10 +25,11 @@ ArgoCD Application の `targetRevision`（Helm チャートのバージョン、
 可視化するだけに留める。
 
 `createContainerApplication`（コンテナイメージ用ヘルパー、内部で `createHelmApplication`
-を呼び出している）はスキャナの検出対象外。`ts_scanner.py` の `CALL_RE` が
+を呼び出している）と `createHelmApplicationSet`（List generator で複数の Helm
+Application を生成するヘルパー）はスキャナの検出対象外。`ts_scanner.py` の `CALL_RE` が
 `createHelmApplication(` という文字列を直接検出する実装のため、別名関数経由の
 呼び出しは拾えない。対応が必要になった場合は `CALL_RE` の複数関数名対応と、
-`repoUrl` が呼び出し側に現れない分の暗黙値フォールバックを追加すること。
+ApplicationSet の `applications` 配列を走査する処理を追加すること。
 
 `scripts/` 配下の CLI は `scan` → `resolve` → `apply` → `report` の4段階に分かれている。
 ネットワークアクセスが発生するのは `resolve` だけ。各段階の出力は中間ファイルとして
