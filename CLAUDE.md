@@ -52,7 +52,8 @@ devShell（`direnv` 経由で `flake.nix` を自動読み込み。手動なら `
 ### `packages/lib/` のヘルパー
 
 `packages/lib/argocd-application.ts` が ArgoCD `Application` リソースを生成する4つの関数を提供する。
-`packages/lib/argocd-applicationset.ts` は、複数の Application を管理する `ApplicationSet` 用の2関数を提供する
+`packages/lib/argocd-applicationset.ts` は、複数の Application を管理する `ApplicationSet` 用の2関数を提供する。
+`packages/lib/argocd-project.ts` の `createAppProject` は、source・destination・リソース種別・プロジェクト RBAC を制限する `AppProject` を生成する。
 （詳細と使い分けは [docs/applications.md](docs/applications.md)）。
 
 Application:
@@ -74,6 +75,8 @@ ApplicationSet:
   複数の Helm Application を List generator で生成する。個別の `valuesObject` は `templatePatch` で反映する
 - `createApplicationSet`
   任意の generator/template を宣言する低レベルヘルパー
+
+Application ヘルパー4関数と `createHelmApplicationSet` では、任意の `project` で所属先 AppProject を指定できる。省略時は後方互換のため `default` になり、既存 Application はすべて `default` のまま維持される。新規 AppProject は `createAppProject` で宣言する。
 
 Application ヘルパー4関数と、`createHelmApplicationSet` が生成する Application はすべて
 `syncPolicy.automated.prune: true` / `selfHeal: true` が固定。**コード上の定義を削除して push することが、リソース削除の唯一の正規手順**（`kubectl delete` を単体で行っても selfHeal で復活する）。詳細は[docs/resource-deletion.md](docs/resource-deletion.md)。
@@ -101,7 +104,7 @@ ArgoCD 自体はこのリポジトリのコードだけでは導入できない�
 リソース種別ごとの作成・削除手順は `docs/` 配下に分かれている。新しい種類のリソースを追加する前に該当ドキュメントを確認すること。
 
 - [docs/applications.md](docs/applications.md)
-  ArgoCD Application の4パターンの使い分けとHTTPRoute の追加方法
+  ArgoCD AppProject、Application の4パターン、ApplicationSet の使い分けとHTTPRoute の追加方法
 - [docs/jobs.md](docs/jobs.md)
   CronJob/Job を生の `ApiObject` で書く方法
 - [docs/config-and-secrets.md](docs/config-and-secrets.md)

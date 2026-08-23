@@ -169,6 +169,20 @@ Application に resource finalizer が付かなくなる。通常運用ではデ
 `false` を使用すること。安易に有効化すると、ArgoCD の管理外となったリソースが
 クラスタに残るため注意する。
 
+## AppProject を削除する
+
+`createAppProject(...)` の定義を削除すると、その変更が root Application に
+反映される。prune により、対応する `AppProject` が削除される。削除する前に、
+そのプロジェクト名を参照している Application / ApplicationSet template を
+すべて確認する。それぞれの `project` を別の既存 AppProject（必要なら
+`default`）へ変更し、反映済みであることも確認する。
+
+参照中の AppProject だけを先に削除すると、対象 Application の spec が無効に
+なり、新しい sync や操作が失敗する。AppProject を削除しても、配下の
+Application やその管理リソースが自動的に削除されるわけではない。
+管理不能な状態を避けるため、参照の移行と AppProject の削除は別々の変更として
+順番に反映する。
+
 ## デプロイ（削除の反映）までの手順
 
 1. 対象 `packages/ns/<namespace>/index.ts` から該当リソースを削除する。

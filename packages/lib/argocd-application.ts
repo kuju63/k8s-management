@@ -1,7 +1,11 @@
 import { ApiObject, type Chart } from "cdk8s";
-import { APP_TEMPLATE_REPO_URL, ARGOCD_NAMESPACE, GIT_REPO_URL, GIT_TARGET_REVISION } from "./config.js";
-
-const DESTINATION_SERVER = "https://kubernetes.default.svc";
+import {
+  APP_TEMPLATE_REPO_URL,
+  ARGOCD_NAMESPACE,
+  GIT_REPO_URL,
+  GIT_TARGET_REVISION,
+  IN_CLUSTER_SERVER,
+} from "./config.js";
 
 /** ArgoCD の Helm source で使用する正規化済みリポジトリ情報。 */
 export interface NormalizedHelmSource {
@@ -42,6 +46,8 @@ export interface HelmApplicationProps {
   readonly name: string;
   /** インストール先 namespace。 */
   readonly namespace: string;
+  /** Application を所属させる AppProject 名。省略時は `default`。 */
+  readonly project?: string;
   /** Helm リポジトリURL、または OCI レジストリURL（`oci://...`）。 */
   readonly repoUrl: string;
   /** 通常の Helm リポジトリの場合のみ指定（OCI の場合は repoUrl にチャート名まで含まれるため省略）。 */
@@ -71,10 +77,10 @@ export function createHelmApplication( chart: Chart, id: string, props: HelmAppl
     kind: "Application",
     metadata: { name: props.name, namespace: ARGOCD_NAMESPACE },
     spec: {
-      project: "default",
+      project: props.project ?? "default",
       source,
       destination: {
-        server: DESTINATION_SERVER,
+        server: IN_CLUSTER_SERVER,
         namespace: props.namespace,
       },
       syncPolicy: {
@@ -94,6 +100,8 @@ export interface GitApplicationProps {
   readonly namespace: string;
   /** 監視対象の git リポジトリURL。 */
   readonly repoUrl: string;
+  /** Application を所属させる AppProject 名。省略時は `default`。 */
+  readonly project?: string;
   /** 監視対象のブランチ・タグ・コミットSHA。 */
   readonly targetRevision: string;
   /** リポジトリ内での監視対象パス。 */
@@ -109,7 +117,7 @@ export function createGitApplication( chart: Chart, id: string, props: GitApplic
     kind: "Application",
     metadata: { name: props.name, namespace: ARGOCD_NAMESPACE },
     spec: {
-      project: "default",
+      project: props.project ?? "default",
       source: {
         repoURL: props.repoUrl,
         targetRevision: props.targetRevision,
@@ -117,7 +125,7 @@ export function createGitApplication( chart: Chart, id: string, props: GitApplic
         directory: { recurse: props.recurse ?? false },
       },
       destination: {
-        server: DESTINATION_SERVER,
+        server: IN_CLUSTER_SERVER,
         namespace: props.namespace,
       },
       syncPolicy: {
@@ -135,6 +143,8 @@ export interface DirectoryApplicationProps {
   readonly namespace: string;
   /** このリポジトリ内での監視対象パス。 */
   readonly path: string;
+  /** Application を所属させる AppProject 名。省略時は `default`。 */
+  readonly project?: string;
   /** `path` 配下のサブディレクトリも再帰的に監視するか。省略時は `false`。 */
   readonly recurse?: boolean;
 }
@@ -144,6 +154,7 @@ export function createDirectoryApplication( chart: Chart, id: string, props: Dir
   return createGitApplication( chart, id, {
     name: props.name,
     namespace: props.namespace,
+    project: props.project ?? "default",
     repoUrl: GIT_REPO_URL,
     targetRevision: GIT_TARGET_REVISION,
     path: props.path,
@@ -242,6 +253,8 @@ export interface ContainerApplicationProps {
   readonly namespace: string;
   /** bjw-s-labs/app-template チャート自体のバージョン。デプロイ対象アプリのバージョンは image.tag 側で指定する。 */
   readonly targetRevision: string;
+  /** Application を所属させる AppProject 名。省略時は `default`。 */
+  readonly project?: string;
 
   /** 実行するコンテナイメージ。 */
   readonly image: ContainerImage;
@@ -390,6 +403,7 @@ export function createContainerApplication( chart: Chart, id: string, props: Con
   return createHelmApplication( chart, id, {
     name: props.name,
     namespace: props.namespace,
+    project: props.project ?? "default",
     repoUrl: APP_TEMPLATE_REPO_URL,
     targetRevision: props.targetRevision,
     valuesObject,

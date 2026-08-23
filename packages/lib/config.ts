@@ -12,6 +12,9 @@ export const MANIFESTS_PATH = "manifests";
 /** ArgoCD がインストールされる namespace。 */
 export const ARGOCD_NAMESPACE = "argocd";
 
+/** ArgoCD が同一クラスタへのデプロイに使用する Kubernetes API server。 */
+export const IN_CLUSTER_SERVER = "https://kubernetes.default.svc";
+
 /** createContainerApplication が内部でラップする汎用 Helm チャート（コンテナ実行用）。 */
 export const APP_TEMPLATE_REPO_URL = "oci://ghcr.io/bjw-s-labs/helm/app-template";
 

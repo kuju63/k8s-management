@@ -34,6 +34,104 @@ Service を持つ namespace の Chart 内に、生の `ApiObject` として追�
 作成した Application を削除する場合の手順は
 [resource-deletion.md](./resource-deletion.md) を参照。
 
+## ArgoCD プロジェクトを設定する
+
+ArgoCD の `AppProject` は、Application を論理的にグループ化し、次の項目を
+プロジェクト単位で制限する。
+
+- 利用できる Git/Helm source リポジトリ
+- デプロイ先クラスタと namespace
+- デプロイできるクラスタスコープ・namespace スコープのリソース種別
+- OIDC group などに紐づけるプロジェクト role と Application RBAC
+
+`packages/lib/argocd-project.ts` の `createAppProject` で `AppProject` を
+作成する。Application ヘルパーの `project` には同じ名前を指定する。
+
+```ts
+import { createHelmApplication } from "../../lib/argocd-application.js";
+import { createAppProject } from "../../lib/argocd-project.js";
+
+const PROJECT = "monitoring";
+
+createAppProject(this, "argocd-project", {
+    name: PROJECT,
+    description: "監視系スタック用プロジェクト",
+    sourceRepos: [
+        "https://prometheus-community.github.io/helm-charts",
+        "https://grafana.github.io/helm-charts",
+    ],
+    destinations: [
+        {
+            server: "https://kubernetes.default.svc",
+            namespace: "monitoring",
+        },
+    ],
+    clusterResourceWhitelist: [{ group: "*", kind: "*" }],
+    namespaceResourceWhitelist: [{ group: "*", kind: "*" }],
+});
+
+createHelmApplication(this, "argocd-application", {
+    name: "kube-prometheus-stack",
+    namespace: "monitoring",
+    project: PROJECT,
+    repoUrl: "https://prometheus-community.github.io/helm-charts",
+    chart: "kube-prometheus-stack",
+    targetRevision: "88.3.0",
+});
+```
+
+`AppProject` と `Application` は ArgoCD の namespace に置く必要がある。
+`createAppProject` と各 Application ヘルパーは、`metadata.namespace` を
+`ARGOCD_NAMESPACE` に固定している。
+
+`project` は次の Application ヘルパーで指定できる。
+
+- `createHelmApplication`
+- `createGitApplication`
+- `createDirectoryApplication`
+- `createContainerApplication`
+- `createHelmApplicationSet`
+
+省略時は後方互換のため `default` になる。
+
+**既存リソースは `project` を指定しておらず、引き続きすべて `default` に
+所属する。** 新しい AppProject を定義しただけでは既存の Application は
+移動しない。
+
+プロジェクト role を OIDC group に割り当てる場合は、`roles` を追加する。
+実際の group 名は利用する IdP の設定に合わせること。
+
+```ts
+createAppProject(this, "argocd-project", {
+    name: PROJECT,
+    sourceRepos: ["https://prometheus-community.github.io/helm-charts"],
+    destinations: [
+        {
+            server: "https://kubernetes.default.svc",
+            namespace: "monitoring",
+        },
+    ],
+    roles: [
+        {
+            name: "viewer",
+            description: "監視 Application の読み取り専用 role",
+            policies: [
+                "p, proj:monitoring:viewer, applications, get, monitoring/*, allow",
+            ],
+            groups: ["your-oidc-group"],
+        },
+    ],
+});
+```
+
+`sourceRepos` と `destinations` は必要最小限に絞る。特に `*` を指定すると
+`default` プロジェクトと同様に制限が弱くなる。クラスタスコープリソースは
+デフォルトでは許可されないため、CRD や ClusterRole などが必要な Helm
+チャートでは `clusterResourceWhitelist` を明示する。
+
+詳細なフィールドと制約は ArgoCD 公式の
+[Projects](https://argo-cd.readthedocs.io/en/stable/user-guide/projects/) を参照する。
+
 ## `createHelmApplication` で Helm チャートを追加する
 
 `packages/ns/metallb-system/index.ts` のように、Helm チャートをそのまま

@@ -1,8 +1,6 @@
 import { ApiObject, type Chart } from "cdk8s";
 import { normalizeHelmSource, type HelmApplicationProps } from "./argocd-application.js";
-import { ARGOCD_NAMESPACE } from "./config.js";
-
-const DESTINATION_SERVER = "https://kubernetes.default.svc";
+import { ARGOCD_NAMESPACE, IN_CLUSTER_SERVER } from "./config.js";
 
 /** `createApplicationSet` のプロパティ。 */
 export interface ApplicationSetProps {
@@ -51,7 +49,7 @@ export function createApplicationSet( chart: Chart, id: string, props: Applicati
 }
 
 /** `createHelmApplicationSet` が生成する Application 1件分の指定。 */
-export type HelmApplicationSetApplication = Omit< HelmApplicationProps, "namespace" >;
+export type HelmApplicationSetApplication = Omit< HelmApplicationProps, "namespace" | "project" >;
 
 /** `createHelmApplicationSet` のプロパティ。 */
 export interface HelmApplicationSetProps {
@@ -59,6 +57,8 @@ export interface HelmApplicationSetProps {
   readonly name: string;
   /** すべての Application に共通するインストール先 namespace。 */
   readonly namespace: string;
+  /** すべての Application を所属させる AppProject 名。省略時は `default`。 */
+  readonly project?: string;
   /** List generator で生成する Helm Application 群。 */
   readonly applications: readonly HelmApplicationSetApplication[];
   /** ApplicationSet 削除時に、各 Application がデプロイしたリソースを残すか。省略時は `false`。 */
@@ -96,14 +96,14 @@ export function createHelmApplicationSet( chart: Chart, id: string, props: HelmA
     template: {
       metadata: { name: "{{ .name }}" },
       spec: {
-        project: "default",
+        project: props.project ?? "default",
         source: {
           repoURL: "{{ .repoURL }}",
           chart: "{{ .chart }}",
           targetRevision: "{{ .targetRevision }}",
         },
         destination: {
-          server: DESTINATION_SERVER,
+          server: IN_CLUSTER_SERVER,
           namespace: props.namespace,
         },
         syncPolicy: {
