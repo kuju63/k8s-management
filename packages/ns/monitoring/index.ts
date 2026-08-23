@@ -99,6 +99,10 @@ export class MonitoringChart extends Chart {
           useTestSchema: true,
         },
         singleBinary: { replicas: 1 },
+        // SingleBinary と競合する SimpleScalable モードのデフォルト replica を無効化。
+        backend: { replicas: 0 },
+        read: { replicas: 0 },
+        write: { replicas: 0 },
         // memcached ベースのキャッシュはホームラボ規模では不要なリソース消費のため無効化。
         resultsCache: { enabled: false },
         chunksCache: { enabled: false },

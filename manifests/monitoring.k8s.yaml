@@ -38,6 +38,8 @@ spec:
     chart: loki
     helm:
       valuesObject:
+        backend:
+          replicas: 0
         chunksCache:
           enabled: false
         deploymentMode: SingleBinary
@@ -48,10 +50,14 @@ spec:
           storage:
             type: filesystem
           useTestSchema: true
+        read:
+          replicas: 0
         resultsCache:
           enabled: false
         singleBinary:
           replicas: 1
+        write:
+          replicas: 0
     repoURL: https://grafana.github.io/helm-charts
     targetRevision: 7.3.0
   syncPolicy:

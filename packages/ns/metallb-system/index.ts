@@ -19,9 +19,13 @@ export class MetallbSystemChart extends Chart {
     createHelmApplication( this, "argocd-application", {
       name: "metallb",
       namespace: NAMESPACE,
-      repoUrl: "https://github.com/metallb/metallb",
-      chart: "metallb-native.yaml",
+      repoUrl: "https://metallb.github.io/metallb",
+      chart: "metallb",
       targetRevision: "0.16.1",
+      valuesObject: {
+        speaker: { frr: { enabled: false } },
+        frrk8s: { enabled: false },
+      },
     } );
 
     new ApiObject( this, "ip-address-pool", {
