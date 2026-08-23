@@ -98,7 +98,7 @@ export class MonitoringChart extends Chart {
           storage: { type: "filesystem" },
           useTestSchema: true,
         },
-        singleBinary: { replicas: 1 },
+        singleBinary: { replicas: 1, persistence: { enabled: false } },
         // SingleBinary と競合する SimpleScalable モードのデフォルト replica を無効化。
         backend: { replicas: 0 },
         read: { replicas: 0 },

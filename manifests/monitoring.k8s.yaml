@@ -55,6 +55,8 @@ spec:
         resultsCache:
           enabled: false
         singleBinary:
+          persistence:
+            enabled: false
           replicas: 1
         write:
           replicas: 0
