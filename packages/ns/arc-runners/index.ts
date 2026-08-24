@@ -24,8 +24,8 @@ export class ArcRunnersChart extends Chart {
       repoUrl: "oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set",
       targetRevision: "0.14.2",
       valuesObject: {
-        githubConfigUrl: "https://github.com/TODO-org/TODO-repo",
-        githubConfigSecret: "TODO-github-config-secret",
+        githubConfigUrl: "https://github.com/kuju63",
+        githubConfigSecret: "github-config-secret",
         controllerServiceAccount: {
           namespace: "actions-runner-system",
           name: "arc-controller-gha-rs-controller",
