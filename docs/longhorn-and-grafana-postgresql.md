@@ -23,10 +23,13 @@ Longhornの反映前に、公式CLIでworkerノードの要件を確認する。
 curl -fsSL -o /tmp/longhornctl \
   https://github.com/longhorn/cli/releases/download/v1.12.1/longhornctl-linux-amd64
 chmod +x /tmp/longhornctl
-kubectl create namespace longhorn-system
+kubectl create namespace longhorn-system \
+  --dry-run=client -o yaml | kubectl apply -f -
 /tmp/longhornctl check preflight
-kubectl delete namespace longhorn-system
 ```
+
+`longhorn-system` namespaceはLonghorn本体が使用するため、preflight後に削除しては
+いけない。初回導入前に作成したnamespaceは、そのままcdk8s/ArgoCD管理へ引き継ぐ。
 
 このクラスタではRWO・非暗号化ボリュームのみを使用する。必須となる
 `iscsi-initiator-utils`、`iscsi_tcp`、device-mapper、および`iscsid`のsocket
