@@ -5,6 +5,7 @@ import { ActionsRunnerSystemChart } from "./ns/actions-runner-system/index.js";
 import { ArcRunnersChart } from "./ns/arc-runners/index.js";
 import { ArgocdChart } from "./ns/argocd/index.js";
 import { EnvoyGatewaySystemChart } from "./ns/envoy-gateway-system/index.js";
+import { LocalPathStorageChart } from "./ns/local-path-storage/index.js";
 import { MetallbSystemChart } from "./ns/metallb-system/index.js";
 import { MonitoringChart } from "./ns/monitoring/index.js";
 
@@ -13,6 +14,7 @@ function buildApp(): App {
 
   new MetallbSystemChart( app );
   new EnvoyGatewaySystemChart( app );
+  new LocalPathStorageChart( app );
   new ArgocdChart( app );
   new ActionsRunnerSystemChart( app );
   new ArcRunnersChart( app );

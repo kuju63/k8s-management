@@ -3,6 +3,95 @@ kind: Namespace
 metadata:
   name: monitoring
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-postgresql
+  namespace: monitoring
+spec:
+  clusterIP: None
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: grafana-postgresql
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: grafana-postgresql
+  namespace: monitoring
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-postgresql
+  serviceName: grafana-postgresql
+  template:
+    metadata:
+      labels:
+        app: grafana-postgresql
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_USER
+              value: grafana
+            - name: POSTGRES_DB
+              value: grafana
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: postgres-password
+                  name: grafana-credentials
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          image: docker.io/library/postgres:18.6@sha256:06cad38a5d9f5d24b4d83d86def30795d5e4b757fedbf5281172b576dedcd941
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - grafana
+                - -d
+                - grafana
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          name: postgresql
+          ports:
+            - containerPort: 5432
+              name: postgresql
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - grafana
+                - -d
+                - grafana
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: data
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: local-path
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -33,6 +122,23 @@ spec:
               type: jaeger
               uid: jaeger
               url: http://jaeger.monitoring.svc.cluster.local:16686
+          admin:
+            existingSecret: grafana-credentials
+            passwordKey: admin-password
+            userKey: admin-user
+          envValueFrom:
+            GF_DATABASE_PASSWORD:
+              secretKeyRef:
+                key: postgres-password
+                name: grafana-credentials
+          grafana.ini:
+            database:
+              host: grafana-postgresql.monitoring.svc.cluster.local:5432
+              name: grafana
+              password: $__env{GF_DATABASE_PASSWORD}
+              ssl_mode: disable
+              type: postgres
+              user: grafana
     repoURL: https://prometheus-community.github.io/helm-charts
     targetRevision: 88.3.0
   syncPolicy:
