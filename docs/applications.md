@@ -12,9 +12,10 @@
   にする。`packages/ns/argocd/index.ts` の App-of-Apps root
   （`app-of-apps` Application）専用のヘルパー。通常の namespace 追加作業
   では使わない
-- `createContainerApplication` — コンテナイメージから直接 Deployment/Service
-  を作る。内部で bjw-s-labs/app-template という汎用 Helm チャートをラップ
-  しており、Helm チャートを自作せずに単一コンテナのアプリを追加できる
+- `createContainerApplication` — コンテナイメージから直接 Deployment または
+  StatefulSet と Service を作る。内部で bjw-s-labs/app-template という汎用 Helm
+  チャートをラップしており、Helm チャートを自作せずに単一コンテナのアプリを
+  追加できる
 
 `packages/lib/argocd-applicationset.ts` には、`ApplicationSet` 用の
 ヘルパー関数が2つ用意されている。これらは複数の Application を自動生成・管理する。
@@ -198,9 +199,9 @@ createGitApplication(this, "argocd-application", {
 
 ## `createContainerApplication` でコンテナイメージから直接追加する
 
-Helm チャートや Deployment/Service のマニフェストを自前で書く必要はない。
-コンテナイメージ・env・envFrom・永続化ボリューム・Service を指定するだけで
-ArgoCD Application を作れる。内部では
+Helm チャートや Deployment/StatefulSet/Service のマニフェストを自前で書く
+必要はない。コンテナイメージ・controller 種別・env・envFrom・永続化ボリューム・
+Service を指定するだけで ArgoCD Application を作れる。内部では
 [bjw-s-labs/app-template](https://github.com/bjw-s-labs/helm-charts) という
 汎用 Helm チャートを `createHelmApplication` 経由でラップしている。
 呼び出し側は Helm チャートの存在を意識する必要はない。
@@ -248,11 +249,52 @@ bjw-s-labs/app-template チャート自体のバージョンであり、デプ�
 の4種類をサポートする。`configMap`/`secret` タイプは、この呼び出しの外で
 既に作られているリソースの `name` を参照する形のみサポートする。
 
+### StatefulSet を作成する
+
+`controllerType` の省略時は Deployment を生成する。PostgreSQL などの stateful な
+アプリ（DB 等）には `"statefulset"` を指定し、`persistence` でデータ用の PVC も
+設定する。
+
+```ts
+createContainerApplication(this, "argocd-application", {
+    name: "postgresql",
+    namespace: NAMESPACE,
+    targetRevision: "5.0.1",
+    controllerType: "statefulset",
+    image: { repository: "postgres", tag: "17" },
+    env: {
+        POSTGRES_PASSWORD: {
+            secretKeyRef: { name: "postgresql-secret", key: "password" },
+        },
+    },
+    persistence: {
+        data: {
+            type: "persistentVolumeClaim",
+            accessMode: "ReadWriteOnce",
+            size: "10Gi",
+            retain: true,
+            globalMounts: [{ path: "/var/lib/postgresql/data" }],
+        },
+    },
+    service: {
+        ports: { postgresql: { port: 5432 } },
+    },
+});
+```
+
+このヘルパーの `persistentVolumeClaim` は、StatefulSet の
+`volumeClaimTemplates` ではなく、独立した単一の PVC を作成する。
+したがって、StatefulSet と PVC の組み合わせは単一レプリカを前提とする。
+Pod ごとに個別の PVC が必要な複数レプリカ構成では、`volumeClaimTemplates` を
+定義できる方法を使うこと。たとえば `createHelmApplication` で専用の Helm
+チャートを導入する。
+
 **`syncPolicy.automated.prune: true` は常に有効になっている。**
-`persistence` の項目をコードから削除すると、対応する PVC も自動で
-削除される（データ消失）。既存3ヘルパーはこのリポジトリで PVC を作る
-経路が無かったため影響しなかったが、`createContainerApplication` では
-運用上の注意点になる。
+`persistence` の項目をコードから削除すると、対応する PVC も自動で削除される
+（データ消失）。データを Application 削除後も残す必要がある場合は、PVC に
+`retain: true` を指定する。既存3ヘルパーはこのリポジトリで PVC を作る経路が
+無かったため影響しなかったが、`createContainerApplication` では運用上の
+注意点になる。
 
 `service` を指定した場合、生成される Service 名は `props.name` と同じになる。
 `props.name` は Application の name であり、Helm の release 名とも一致する。

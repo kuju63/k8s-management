@@ -245,9 +245,18 @@ export interface ContainerServiceProps {
   readonly ports: Record< string, { readonly port: number } >;
 }
 
+/**
+ * `createContainerApplication` が生成するワークロードコントローラの種別。
+ *
+ * @remarks
+ * `"deployment"` はステートレスなアプリ向け。PostgreSQL などの stateful な
+ * アプリ（DB 等）では `"statefulset"` を指定する。
+ */
+export type ContainerControllerType = "deployment" | "statefulset";
+
 /** `createContainerApplication` のプロパティ。 */
 export interface ContainerApplicationProps {
-  /** ArgoCD Application 名（= リソース名）。生成される Deployment/Service/PVC 等の名前にもなる。 */
+  /** ArgoCD Application 名（= リソース名）。生成されるワークロード/Service/PVC 等の名前にもなる。 */
   readonly name: string;
   /** インストール先 namespace。 */
   readonly namespace: string;
@@ -255,6 +264,20 @@ export interface ContainerApplicationProps {
   readonly targetRevision: string;
   /** Application を所属させる AppProject 名。省略時は `default`。 */
   readonly project?: string;
+
+  /**
+   * 生成するワークロードコントローラの種別。
+   *
+   * @remarks
+   * PostgreSQL などの stateful なアプリ（DB 等）では `"statefulset"` を指定する。
+   * StatefulSet 化しても永続化は自動では有効にならないため、あわせて
+   * `persistence` で PVC を指定すること。また `syncPolicy.automated.prune` が
+   * 常に有効なため、データを残したい PVC には `persistence` 側で `retain: true`
+   * を指定する。
+   *
+   * @defaultValue `"deployment"`
+   */
+  readonly controllerType?: ContainerControllerType;
 
   /** 実行するコンテナイメージ。 */
   readonly image: ContainerImage;
@@ -335,7 +358,15 @@ function buildPersistence( persistence: Record< string, PersistenceVolume > ): R
  * デフォルトで `<release名>-app-template` になり、release名（= Application名 = props.name）
  * と一致しないため、Service 名などのリソース名を props.name に揃えるための対応。
  *
+ * @remarks
+ * `controllerType` に `"statefulset"` を指定すると、生成されるワークロードが
+ * StatefulSet になる。PostgreSQL などの stateful なアプリ（DB 等）向け。
+ * StatefulSet 化しても永続化は自動では有効にならないため、あわせて `persistence`
+ * で PVC を指定する。`syncPolicy.automated.prune` が常に有効なため、削除時に
+ * データを残したい PVC には `retain: true` を指定すること。
+ *
  * @example
+ * 単一コンテナのステートレスなアプリ:
  * ```ts
  * createContainerApplication(this, "argocd-application", {
  *     name: "example-app",
@@ -362,6 +393,35 @@ function buildPersistence( persistence: Record< string, PersistenceVolume > ): R
  *     },
  * });
  * ```
+ *
+ * @example
+ * PostgreSQL などの stateful なアプリ（StatefulSet + PVC）:
+ * ```ts
+ * createContainerApplication(this, "argocd-application", {
+ *     name: "postgresql",
+ *     namespace: NAMESPACE,
+ *     targetRevision: "5.0.1",
+ *     controllerType: "statefulset",
+ *     image: { repository: "postgres", tag: "17" },
+ *     env: {
+ *         POSTGRES_PASSWORD: {
+ *             secretKeyRef: { name: "postgresql-secret", key: "password" },
+ *         },
+ *     },
+ *     persistence: {
+ *         data: {
+ *             type: "persistentVolumeClaim",
+ *             accessMode: "ReadWriteOnce",
+ *             size: "10Gi",
+ *             retain: true,
+ *             globalMounts: [{ path: "/var/lib/postgresql/data" }],
+ *         },
+ *     },
+ *     service: {
+ *         ports: { postgresql: { port: 5432 } },
+ *     },
+ * });
+ * ```
  */
 export function createContainerApplication( chart: Chart, id: string, props: ContainerApplicationProps ): ApiObject {
   const container: Record< string, unknown > = {
@@ -383,12 +443,17 @@ export function createContainerApplication( chart: Chart, id: string, props: Con
     container.envFrom = props.envFrom;
   }
 
+  const controller: Record< string, unknown > = {
+    containers: { main: container },
+  };
+  if ( props.controllerType !== undefined ) {
+    controller.type = props.controllerType;
+  }
+
   const valuesObject: Record< string, unknown > = {
     nameOverride: props.name,
     controllers: {
-      main: {
-        containers: { main: container },
-      },
+      main: controller,
     },
   };
   if ( props.persistence !== undefined ) {
