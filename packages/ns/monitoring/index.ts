@@ -5,8 +5,6 @@ import { createNamespace } from "../../lib/namespace.js";
 
 const NAMESPACE = "monitoring";
 const PROMETHEUS_STACK_RELEASE = "kube-prometheus-stack";
-const GRAFANA_POSTGRESQL_RELEASE = "grafana-postgresql";
-const GRAFANA_CREDENTIALS_SECRET = "grafana-credentials";
 const LOKI_RELEASE = "loki";
 
 // Alloy(DaemonSet)が自ノード上の Pod ログのみを収集し、Loki の gateway へ push する最小構成。
@@ -75,85 +73,7 @@ export class MonitoringChart extends Chart {
 
     // targetRevision: 2026-08-13 時点の各Helmリポジトリでの最新版。
 
-    // Grafana の状態（ユーザー・パスワード・UI設定など）を保持する PostgreSQL。
-    // 認証情報は git に含めず、事前作成済みの Secret を参照する。
-    new ApiObject( this, "service-grafana-postgresql", {
-      apiVersion: "v1",
-      kind: "Service",
-      metadata: { name: GRAFANA_POSTGRESQL_RELEASE, namespace: NAMESPACE },
-      spec: {
-        clusterIP: "None",
-        selector: { app: GRAFANA_POSTGRESQL_RELEASE },
-        ports: [ { name: "postgresql", port: 5432, targetPort: 5432 } ],
-      },
-    } );
-
-    new ApiObject( this, "statefulset-grafana-postgresql", {
-      apiVersion: "apps/v1",
-      kind: "StatefulSet",
-      metadata: { name: GRAFANA_POSTGRESQL_RELEASE, namespace: NAMESPACE },
-      spec: {
-        serviceName: GRAFANA_POSTGRESQL_RELEASE,
-        replicas: 1,
-        selector: { matchLabels: { app: GRAFANA_POSTGRESQL_RELEASE } },
-        persistentVolumeClaimRetentionPolicy: {
-          whenDeleted: "Retain",
-          whenScaled: "Retain",
-        },
-        template: {
-          metadata: { labels: { app: GRAFANA_POSTGRESQL_RELEASE } },
-          spec: {
-            securityContext: { fsGroup: 999, fsGroupChangePolicy: "OnRootMismatch" },
-            containers: [
-              {
-                name: "postgresql",
-                image:
-                  "docker.io/library/postgres:18.6@sha256:06cad38a5d9f5d24b4d83d86def30795d5e4b757fedbf5281172b576dedcd941",
-                imagePullPolicy: "IfNotPresent",
-                ports: [ { name: "postgresql", containerPort: 5432 } ],
-                env: [
-                  { name: "POSTGRES_USER", value: "grafana" },
-                  { name: "POSTGRES_DB", value: "grafana" },
-                  {
-                    name: "POSTGRES_PASSWORD",
-                    valueFrom: {
-                      secretKeyRef: {
-                        name: GRAFANA_CREDENTIALS_SECRET,
-                        key: "postgres-password",
-                      },
-                    },
-                  },
-                  { name: "PGDATA", value: "/var/lib/postgresql/data/pgdata" },
-                ],
-                readinessProbe: {
-                  exec: { command: [ "pg_isready", "-U", "grafana", "-d", "grafana" ] },
-                  initialDelaySeconds: 5,
-                  periodSeconds: 10,
-                },
-                livenessProbe: {
-                  exec: { command: [ "pg_isready", "-U", "grafana", "-d", "grafana" ] },
-                  initialDelaySeconds: 30,
-                  periodSeconds: 10,
-                },
-                volumeMounts: [ { name: "data", mountPath: "/var/lib/postgresql/data" } ],
-              },
-            ],
-          },
-        },
-        volumeClaimTemplates: [
-          {
-            metadata: { name: "data" },
-            spec: {
-              accessModes: [ "ReadWriteOnce" ],
-              storageClassName: "local-path",
-              resources: { requests: { storage: "10Gi" } },
-            },
-          },
-        ],
-      },
-    } );
-
-    // Prometheus + Grafana + Alertmanager。Grafana の内部DBには上記 PostgreSQL を使う。
+    // Prometheus + Grafana + Alertmanager。
     createHelmApplication( this, "argocd-application-prometheus", {
       name: PROMETHEUS_STACK_RELEASE,
       namespace: NAMESPACE,
@@ -162,29 +82,6 @@ export class MonitoringChart extends Chart {
       targetRevision: "88.3.0",
       valuesObject: {
         grafana: {
-          admin: {
-            existingSecret: GRAFANA_CREDENTIALS_SECRET,
-            userKey: "admin-user",
-            passwordKey: "admin-password",
-          },
-          envValueFrom: {
-            GF_DATABASE_PASSWORD: {
-              secretKeyRef: {
-                name: GRAFANA_CREDENTIALS_SECRET,
-                key: "postgres-password",
-              },
-            },
-          },
-          "grafana.ini": {
-            database: {
-              type: "postgres",
-              host: `${ GRAFANA_POSTGRESQL_RELEASE }.${ NAMESPACE }.svc.cluster.local:5432`,
-              name: "grafana",
-              user: "grafana",
-              password: "$__env{GF_DATABASE_PASSWORD}",
-              ssl_mode: "disable",
-            },
-          },
           additionalDataSources: [
             {
               name: "Loki",
