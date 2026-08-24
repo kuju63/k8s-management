@@ -6,6 +6,108 @@ metadata:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: grafana-postgresql
+  namespace: argocd
+spec:
+  destination:
+    namespace: monitoring
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          main:
+            containers:
+              main:
+                env:
+                  POSTGRES_DB: grafana
+                  POSTGRES_PASSWORD:
+                    valueFrom:
+                      secretKeyRef:
+                        key: database-password
+                        name: grafana-credentials
+                  POSTGRES_USER: grafana
+                image:
+                  repository: postgres
+                  tag: 18.6-bookworm
+                probes:
+                  liveness:
+                    custom: true
+                    enabled: true
+                    spec:
+                      exec:
+                        command:
+                          - pg_isready
+                          - -U
+                          - grafana
+                          - -d
+                          - grafana
+                      failureThreshold: 6
+                      periodSeconds: 30
+                      timeoutSeconds: 5
+                  readiness:
+                    custom: true
+                    enabled: true
+                    spec:
+                      exec:
+                        command:
+                          - pg_isready
+                          - -U
+                          - grafana
+                          - -d
+                          - grafana
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                  startup:
+                    custom: true
+                    enabled: true
+                    spec:
+                      exec:
+                        command:
+                          - pg_isready
+                          - -U
+                          - grafana
+                          - -d
+                          - grafana
+                      failureThreshold: 60
+                      periodSeconds: 5
+                resources:
+                  limits:
+                    memory: 1Gi
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+            type: statefulset
+        nameOverride: grafana-postgresql
+        persistence:
+          data:
+            accessMode: ReadWriteOnce
+            globalMounts:
+              - path: /var/lib/postgresql
+            retain: true
+            size: 10Gi
+            storageClass: longhorn
+            type: persistentVolumeClaim
+        service:
+          main:
+            controller: main
+            ports:
+              postgresql:
+                port: 5432
+    repoURL: ghcr.io/bjw-s-labs/helm
+    targetRevision: 5.1.0
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: kube-prometheus-stack
   namespace: argocd
 spec:
@@ -33,6 +135,22 @@ spec:
               type: jaeger
               uid: jaeger
               url: http://jaeger.monitoring.svc.cluster.local:16686
+          admin:
+            existingSecret: grafana-credentials
+            passwordKey: admin-password
+            userKey: admin-user
+          envValueFrom:
+            GF_DATABASE_PASSWORD:
+              secretKeyRef:
+                key: database-password
+                name: grafana-credentials
+          grafana.ini:
+            database:
+              host: grafana-postgresql:5432
+              name: grafana
+              ssl_mode: disable
+              type: postgres
+              user: grafana
     repoURL: https://prometheus-community.github.io/helm-charts
     targetRevision: 88.3.0
   syncPolicy:

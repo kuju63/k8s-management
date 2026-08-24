@@ -245,6 +245,24 @@ export interface ContainerServiceProps {
   readonly ports: Record< string, { readonly port: number } >;
 }
 
+
+/** `createContainerApplication` のコンテナprobe指定。 */
+export interface ContainerProbeProps {
+  /** probeを有効化する。 */
+  readonly enabled: boolean;
+  /** app-templateの自動生成ではなく、`spec`をKubernetes Probeとして直接使用する。 */
+  readonly custom: true;
+  /** KubernetesのProbe spec。 */
+  readonly spec: Record< string, unknown >;
+}
+
+/** コンテナのstartup/readiness/liveness probe。 */
+export interface ContainerProbes {
+  readonly startup?: ContainerProbeProps;
+  readonly readiness?: ContainerProbeProps;
+  readonly liveness?: ContainerProbeProps;
+}
+
 /**
  * `createContainerApplication` が生成するワークロードコントローラの種別。
  *
@@ -287,6 +305,9 @@ export interface ContainerApplicationProps {
   readonly args?: readonly string[];
   /** コンテナのリソース制限・要求。 */
   readonly resources?: ContainerResources;
+
+  /** コンテナのstartup/readiness/liveness probe。 */
+  readonly probes?: ContainerProbes;
 
   /** 環境変数。値は文字列リテラル、または Secret/ConfigMap の特定キー参照のいずれか。 */
   readonly env?: Record< string, string | EnvValueFrom >;
@@ -435,6 +456,9 @@ export function createContainerApplication( chart: Chart, id: string, props: Con
   }
   if ( props.resources !== undefined ) {
     container.resources = props.resources;
+  }
+  if ( props.probes !== undefined ) {
+    container.probes = props.probes;
   }
   if ( props.env !== undefined ) {
     container.env = buildEnv( props.env );

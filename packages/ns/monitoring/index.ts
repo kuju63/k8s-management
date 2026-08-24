@@ -1,10 +1,12 @@
 import { type App, ApiObject, Chart } from "cdk8s";
-import { createHelmApplication } from "../../lib/argocd-application.js";
+import { createContainerApplication, createHelmApplication } from "../../lib/argocd-application.js";
 import { CLUSTER_DOMAIN, GATEWAY_NAME, GATEWAY_NAMESPACE } from "../../lib/config.js";
 import { createNamespace } from "../../lib/namespace.js";
 
 const NAMESPACE = "monitoring";
 const PROMETHEUS_STACK_RELEASE = "kube-prometheus-stack";
+const POSTGRESQL_RELEASE = "grafana-postgresql";
+const GRAFANA_CREDENTIALS_SECRET = "grafana-credentials";
 const LOKI_RELEASE = "loki";
 
 // Alloy(DaemonSet)が自ノード上の Pod ログのみを収集し、Loki の gateway へ push する最小構成。
@@ -71,6 +73,71 @@ export class MonitoringChart extends Chart {
 
     createNamespace( this, NAMESPACE );
 
+    // Grafana の設定DB。PostgreSQL 18 ではメジャーバージョン別のデータディレクトリを
+    // `/var/lib/postgresql` 配下に作るため、その親ディレクトリを Longhorn PVC に載せる。
+    // 認証情報の実体は、事前に作成した Secret のみを参照する。
+    createContainerApplication( this, "argocd-application-grafana-postgresql", {
+      name: POSTGRESQL_RELEASE,
+      namespace: NAMESPACE,
+      targetRevision: "5.1.0",
+      controllerType: "statefulset",
+      image: { repository: "postgres", tag: "18.6-bookworm" },
+      env: {
+        POSTGRES_DB: "grafana",
+        POSTGRES_USER: "grafana",
+        POSTGRES_PASSWORD: {
+          secretKeyRef: { name: GRAFANA_CREDENTIALS_SECRET, key: "database-password" },
+        },
+      },
+      resources: {
+        requests: { cpu: "100m", memory: "256Mi" },
+        limits: { memory: "1Gi" },
+      },
+      probes: {
+        startup: {
+          enabled: true,
+          custom: true,
+          spec: {
+            exec: { command: [ "pg_isready", "-U", "grafana", "-d", "grafana" ] },
+            periodSeconds: 5,
+            failureThreshold: 60,
+          },
+        },
+        readiness: {
+          enabled: true,
+          custom: true,
+          spec: {
+            exec: { command: [ "pg_isready", "-U", "grafana", "-d", "grafana" ] },
+            periodSeconds: 10,
+            timeoutSeconds: 5,
+          },
+        },
+        liveness: {
+          enabled: true,
+          custom: true,
+          spec: {
+            exec: { command: [ "pg_isready", "-U", "grafana", "-d", "grafana" ] },
+            periodSeconds: 30,
+            timeoutSeconds: 5,
+            failureThreshold: 6,
+          },
+        },
+      },
+      persistence: {
+        data: {
+          type: "persistentVolumeClaim",
+          accessMode: "ReadWriteOnce",
+          size: "10Gi",
+          storageClass: "longhorn",
+          retain: true,
+          globalMounts: [ { path: "/var/lib/postgresql" } ],
+        },
+      },
+      service: {
+        ports: { postgresql: { port: 5432 } },
+      },
+    } );
+
     // targetRevision: 2026-08-13 時点の各Helmリポジトリでの最新版。
 
     // Prometheus + Grafana + Alertmanager。
@@ -82,6 +149,25 @@ export class MonitoringChart extends Chart {
       targetRevision: "88.3.0",
       valuesObject: {
         grafana: {
+          admin: {
+            existingSecret: GRAFANA_CREDENTIALS_SECRET,
+            userKey: "admin-user",
+            passwordKey: "admin-password",
+          },
+          envValueFrom: {
+            GF_DATABASE_PASSWORD: {
+              secretKeyRef: { name: GRAFANA_CREDENTIALS_SECRET, key: "database-password" },
+            },
+          },
+          "grafana.ini": {
+            database: {
+              type: "postgres",
+              host: `${ POSTGRESQL_RELEASE }:5432`,
+              name: "grafana",
+              user: "grafana",
+              ssl_mode: "disable",
+            },
+          },
           additionalDataSources: [
             {
               name: "Loki",
