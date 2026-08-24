@@ -74,13 +74,13 @@ export class MonitoringChart extends Chart {
     // targetRevision: 2026-08-13 時点の各Helmリポジトリでの最新版。
 
     // Prometheus + Grafana + Alertmanager。
-    // createHelmApplication( this, "argocd-application-prometheus", {
-    //   name: PROMETHEUS_STACK_RELEASE,
-    //   namespace: NAMESPACE,
-    //   repoUrl: "https://prometheus-community.github.io/helm-charts",
-    //   chart: "kube-prometheus-stack",
-    //   targetRevision: "88.3.0",
-    // } );
+    createHelmApplication( this, "argocd-application-prometheus", {
+      name: PROMETHEUS_STACK_RELEASE,
+      namespace: NAMESPACE,
+      repoUrl: "https://prometheus-community.github.io/helm-charts",
+      chart: "kube-prometheus-stack",
+      targetRevision: "88.3.0",
+    } );
 
     // Loki（filesystem storage・SingleBinaryモードの最小構成。`loki-stack` は
     // upstream で deprecated のため後継の `loki` チャートを使う）。
