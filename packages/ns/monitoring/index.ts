@@ -80,6 +80,30 @@ export class MonitoringChart extends Chart {
       repoUrl: "https://prometheus-community.github.io/helm-charts",
       chart: "kube-prometheus-stack",
       targetRevision: "88.3.0",
+      valuesObject: {
+        grafana: {
+          additionalDataSources: [
+            {
+              name: "Loki",
+              uid: "loki",
+              type: "loki",
+              access: "proxy",
+              url: `http://${ LOKI_RELEASE }-gateway.${ NAMESPACE }.svc.cluster.local`,
+              isDefault: false,
+              editable: false,
+            },
+            {
+              name: "Jaeger",
+              uid: "jaeger",
+              type: "jaeger",
+              access: "proxy",
+              url: `http://jaeger.${ NAMESPACE }.svc.cluster.local:16686`,
+              isDefault: false,
+              editable: false,
+            },
+          ],
+        },
+      },
     } );
 
     // Loki（filesystem storage・SingleBinaryモードの最小構成。`loki-stack` は

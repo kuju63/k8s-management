@@ -15,6 +15,24 @@ spec:
   project: default
   source:
     chart: kube-prometheus-stack
+    helm:
+      valuesObject:
+        grafana:
+          additionalDataSources:
+            - access: proxy
+              editable: false
+              isDefault: false
+              name: Loki
+              type: loki
+              uid: loki
+              url: http://loki-gateway.monitoring.svc.cluster.local
+            - access: proxy
+              editable: false
+              isDefault: false
+              name: Jaeger
+              type: jaeger
+              uid: jaeger
+              url: http://jaeger.monitoring.svc.cluster.local:16686
     repoURL: https://prometheus-community.github.io/helm-charts
     targetRevision: 88.3.0
   syncPolicy:
