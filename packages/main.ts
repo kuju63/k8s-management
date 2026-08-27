@@ -8,6 +8,7 @@ import { EnvoyGatewaySystemChart } from "./ns/envoy-gateway-system/index.js";
 import { LonghornSystemChart } from "./ns/longhorn-system/index.js";
 import { MetallbSystemChart } from "./ns/metallb-system/index.js";
 import { MonitoringChart } from "./ns/monitoring/index.js";
+import { AIBaseSystemChart } from "./ns/ai-base/index.js";
 
 function buildApp(): App {
   const app = new App( { outdir: MANIFESTS_PATH } );
@@ -19,6 +20,7 @@ function buildApp(): App {
   new ActionsRunnerSystemChart( app );
   new ArcRunnersChart( app );
   new MonitoringChart( app );
+  new AIBaseSystemChart( app );
 
   return app;
 }
