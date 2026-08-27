@@ -1,5 +1,5 @@
 import { ApiObject, type Chart } from "cdk8s";
-import { normalizeHelmSource, type HelmApplicationProps } from "./argocd-application.js";
+import { type HelmApplicationProps, normalizeHelmSource } from "./argocd-application.js";
 import { ARGOCD_NAMESPACE, IN_CLUSTER_SERVER } from "./config.js";
 
 /** `createApplicationSet` のプロパティ。 */

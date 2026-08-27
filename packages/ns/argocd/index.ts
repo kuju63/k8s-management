@@ -1,4 +1,4 @@
-import { type App, ApiObject, Chart } from "cdk8s";
+import { ApiObject, type App, Chart } from "cdk8s";
 import { createDirectoryApplication, createHelmApplication } from "../../lib/argocd-application.js";
 import { ARGOCD_NAMESPACE, CLUSTER_DOMAIN, GATEWAY_NAME, GATEWAY_NAMESPACE, MANIFESTS_PATH } from "../../lib/config.js";
 import { createNamespace } from "../../lib/namespace.js";

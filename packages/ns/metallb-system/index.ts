@@ -1,4 +1,4 @@
-import { type App, ApiObject, Chart } from "cdk8s";
+import { ApiObject, type App, Chart } from "cdk8s";
 import { createHelmApplication } from "../../lib/argocd-application.js";
 import { METALLB_ADDRESS_RANGE } from "../../lib/config.js";
 import { createNamespace } from "../../lib/namespace.js";
