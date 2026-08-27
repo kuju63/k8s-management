@@ -245,7 +245,6 @@ export interface ContainerServiceProps {
   readonly ports: Record< string, { readonly port: number } >;
 }
 
-
 /** `createContainerApplication` のコンテナprobe指定。 */
 export interface ContainerProbeProps {
   /** probeを有効化する。 */
