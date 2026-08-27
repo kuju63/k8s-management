@@ -2,13 +2,13 @@ import { execFileSync } from "node:child_process";
 import { App } from "cdk8s";
 import { MANIFESTS_PATH } from "./lib/config.js";
 import { ActionsRunnerSystemChart } from "./ns/actions-runner-system/index.js";
+import { AIBaseSystemChart } from "./ns/ai-base/index.js";
 import { ArcRunnersChart } from "./ns/arc-runners/index.js";
 import { ArgocdChart } from "./ns/argocd/index.js";
 import { EnvoyGatewaySystemChart } from "./ns/envoy-gateway-system/index.js";
 import { LonghornSystemChart } from "./ns/longhorn-system/index.js";
 import { MetallbSystemChart } from "./ns/metallb-system/index.js";
 import { MonitoringChart } from "./ns/monitoring/index.js";
-import { AIBaseSystemChart } from "./ns/ai-base/index.js";
 
 function buildApp(): App {
   const app = new App( { outdir: MANIFESTS_PATH } );
