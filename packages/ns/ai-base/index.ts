@@ -1,4 +1,5 @@
 import { type App, Chart } from "cdk8s";
+import { createAppProject } from "../../lib/argocd-project.js";
 import { createNamespace } from "../../lib/namespace.js";
 
 const NAMESPACE = "ai-base";
@@ -13,5 +14,17 @@ export class AIBaseSystemChart extends Chart {
     super( scope, NAMESPACE );
 
     createNamespace( this, NAMESPACE );
+    createAppProject( this, "", {
+      name: "ai-base",
+      description: "AIアプリ開発基盤",
+      sourceRepos: [],
+      destinations: [
+        {
+          server: "https://kubernetes.default.svc",
+          namespace: NAMESPACE,
+        },
+      ],
+      clusterResourceWhitelist: [ { group: "*", kind: "*" } ],
+    } );
   }
 }
