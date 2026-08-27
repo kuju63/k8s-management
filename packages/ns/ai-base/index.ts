@@ -14,7 +14,7 @@ export class AIBaseSystemChart extends Chart {
     super( scope, NAMESPACE );
 
     createNamespace( this, NAMESPACE );
-    createAppProject( this, "", {
+    createAppProject( this, "ai-base", {
       name: "ai-base",
       description: "AIアプリ開発基盤",
       sourceRepos: [],

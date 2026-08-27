@@ -2,3 +2,18 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: ai-base
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: ai-base
+  namespace: argocd
+spec:
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  description: AIアプリ開発基盤
+  destinations:
+    - namespace: ai-base
+      server: https://kubernetes.default.svc
+  sourceRepos: []
