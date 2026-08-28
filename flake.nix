@@ -21,6 +21,7 @@
             betterleaks
             kubectl
             kubernetes-helm
+            kubeseal
           ];
 
           shellHook = ''
