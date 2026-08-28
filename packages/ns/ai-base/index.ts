@@ -6,6 +6,7 @@ import { createNamespace } from "../../lib/namespace.js";
 
 const NAMESPACE = "ai-base";
 const STACK_NAME = "langflow";
+const PROJECT_NAME = "ai-base";
 
 /**
  * ns: ai-base
@@ -18,7 +19,7 @@ export class AIBaseSystemChart extends Chart {
 
     createNamespace( this, NAMESPACE );
     createAppProject( this, "ai-base", {
-      name: "ai-base",
+      name: PROJECT_NAME,
       description: "AIアプリ開発基盤",
       sourceRepos: [],
       destinations: [
@@ -33,6 +34,7 @@ export class AIBaseSystemChart extends Chart {
     createContainerApplication( this, "langflow", {
       name: STACK_NAME,
       namespace: NAMESPACE,
+      project: PROJECT_NAME,
       targetRevision: "5.0.1",
       image: {
         repository: "docker.io/langflowai/langflow",
@@ -51,6 +53,7 @@ export class AIBaseSystemChart extends Chart {
     // LangflowをHTTPとして公開する
     new ApiObject( this, "httproute", {
       apiVersion: "gateway.networking.k8s.io/v1",
+      project: PROJECT_NAME,
       kind: "HTTPRoute",
       metadata: { name: "langflow", namespace: NAMESPACE },
       spec: {

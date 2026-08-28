@@ -27,7 +27,7 @@ spec:
   destination:
     namespace: ai-base
     server: https://kubernetes.default.svc
-  project: default
+  project: ai-base
   source:
     chart: app-template
     helm:
@@ -62,6 +62,7 @@ kind: HTTPRoute
 metadata:
   name: langflow
   namespace: ai-base
+project: ai-base
 spec:
   hostnames:
     - langflow.home.internal
