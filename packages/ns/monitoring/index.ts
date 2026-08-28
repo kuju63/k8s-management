@@ -79,7 +79,6 @@ export class MonitoringChart extends Chart {
     createContainerApplication( this, "argocd-application-grafana-postgresql", {
       name: POSTGRESQL_RELEASE,
       namespace: NAMESPACE,
-      targetRevision: "5.1.0",
       controllerType: "statefulset",
       image: { repository: "postgres", tag: "18.6-bookworm" },
       env: {

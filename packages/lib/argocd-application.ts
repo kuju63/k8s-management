@@ -277,8 +277,6 @@ export interface ContainerApplicationProps {
   readonly name: string;
   /** インストール先 namespace。 */
   readonly namespace: string;
-  /** bjw-s-labs/app-template チャート自体のバージョン。デプロイ対象アプリのバージョンは image.tag 側で指定する。 */
-  readonly targetRevision: string;
   /** Application を所属させる AppProject 名。省略時は `default`。 */
   readonly project?: string;
 
@@ -493,7 +491,7 @@ export function createContainerApplication( chart: Chart, id: string, props: Con
     namespace: props.namespace,
     project: props.project ?? "default",
     repoUrl: APP_TEMPLATE_REPO_URL,
-    targetRevision: props.targetRevision,
+    targetRevision: "5.1.0",
     valuesObject,
   } );
 }

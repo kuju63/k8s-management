@@ -35,7 +35,6 @@ export class AIBaseSystemChart extends Chart {
       name: STACK_NAME,
       namespace: NAMESPACE,
       project: PROJECT_NAME,
-      targetRevision: "5.0.1",
       image: {
         repository: "docker.io/langflowai/langflow",
         tag: "1.11.5",
