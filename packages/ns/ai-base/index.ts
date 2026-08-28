@@ -1,7 +1,8 @@
-import { ApiObject, type App, Chart } from "cdk8s";
+import { type App, Chart } from "cdk8s";
 import { createContainerApplication } from "../../lib/argocd-application.js";
 import { createAppProject } from "../../lib/argocd-project.js";
-import { CLUSTER_DOMAIN, GATEWAY_NAME, GATEWAY_NAMESPACE } from "../../lib/config.js";
+import { CLUSTER_DOMAIN } from "../../lib/config.js";
+import { createHTTPRoute } from "../../lib/gateway-api.js";
 import { createNamespace } from "../../lib/namespace.js";
 
 const NAMESPACE = "ai-base";
@@ -51,19 +52,11 @@ export class AIBaseSystemChart extends Chart {
     } );
 
     // LangflowをHTTPとして公開する
-    new ApiObject( this, "httproute", {
-      apiVersion: "gateway.networking.k8s.io/v1",
-      kind: "HTTPRoute",
-      metadata: { name: "langflow", namespace: NAMESPACE },
-      spec: {
-        parentRefs: [ { name: GATEWAY_NAME, namespace: GATEWAY_NAMESPACE } ],
-        hostnames: [ `langflow.${ CLUSTER_DOMAIN }` ],
-        rules: [
-          {
-            backendRefs: [ { name: STACK_NAME, port: 7860 } ],
-          },
-        ],
-      },
+    createHTTPRoute( this, {
+      name: "langflow-route",
+      namespace: NAMESPACE,
+      hostnames: [ `${ STACK_NAME }.${ CLUSTER_DOMAIN }` ],
+      backendRefs: [ { name: STACK_NAME, port: 7860 } ],
     } );
   }
 }
