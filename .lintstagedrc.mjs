@@ -3,10 +3,10 @@ export default {
   "*": [ "betterleaks dir" ],
 
   // ---- 2. JS/TS ファイル → biome format + lint ----
-  "*.{js,ts,jsx,tsx}": [ "pnpm run format:check", "pnpm run lint" ],
+  "*.{js,ts,jsx,tsx}": [ "pnpm exec biome check" ],
 
   // ---- HTML / CSS も biome でチェック ----
-  "*.{html,css}": [ "pnpm run format:check", "pnpm run lint" ],
+  "*.{html,css}": [ "pnpm exec biome check" ],
 
   // ---- 3. Markdownファイル → markdownlint + textlint ----
   "*.md": [ "markdownlint-cli2", "textlint" ],

@@ -71,4 +71,4 @@ spec:
   rules:
     - backendRefs:
         - name: langflow
-          port: 80
+          port: 7860

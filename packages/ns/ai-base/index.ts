@@ -58,7 +58,7 @@ export class AIBaseSystemChart extends Chart {
         hostnames: [ `langflow.${ CLUSTER_DOMAIN }` ],
         rules: [
           {
-            backendRefs: [ { name: STACK_NAME, port: 80 } ],
+            backendRefs: [ { name: STACK_NAME, port: 7860 } ],
           },
         ],
       },
