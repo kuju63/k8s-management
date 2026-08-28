@@ -16,7 +16,8 @@ spec:
   destinations:
     - namespace: ai-base
       server: https://kubernetes.default.svc
-  sourceRepos: []
+  sourceRepos:
+    - ghcr.io/bjw-s-labs/helm
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application

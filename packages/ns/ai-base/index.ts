@@ -21,7 +21,7 @@ export class AIBaseSystemChart extends Chart {
     createAppProject( this, "ai-base", {
       name: PROJECT_NAME,
       description: "AIアプリ開発基盤",
-      sourceRepos: [],
+      sourceRepos: [ "ghcr.io/bjw-s-labs/helm" ],
       destinations: [
         {
           server: "https://kubernetes.default.svc",
