@@ -1,4 +1,4 @@
-import { App, Chart } from "cdk8s";
+import { type App, Chart } from "cdk8s";
 import { createHelmApplication } from "../../lib/argocd-application.js";
 
 const NAMESPACE = "kube-system";
