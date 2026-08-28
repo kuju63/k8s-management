@@ -64,7 +64,6 @@ kind: HTTPRoute
 metadata:
   name: langflow
   namespace: ai-base
-project: ai-base
 spec:
   hostnames:
     - langflow.home.internal

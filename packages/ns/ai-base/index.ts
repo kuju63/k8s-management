@@ -53,7 +53,6 @@ export class AIBaseSystemChart extends Chart {
     // LangflowをHTTPとして公開する
     new ApiObject( this, "httproute", {
       apiVersion: "gateway.networking.k8s.io/v1",
-      project: PROJECT_NAME,
       kind: "HTTPRoute",
       metadata: { name: "langflow", namespace: NAMESPACE },
       spec: {
