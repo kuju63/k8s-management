@@ -15,7 +15,7 @@ export class KubeSystemChart extends Chart {
       namespace: NAMESPACE,
       repoUrl: "https://bitnami.github.io/sealed-secrets",
       chart: "sealed-secrets",
-      targetRevision: "helm-v2.19.3",
+      targetRevision: "2.19.3",
       valuesObject: {
         fullnameOverride: "sealed-secrets-controller",
       },
