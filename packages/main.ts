@@ -6,6 +6,7 @@ import { AIBaseSystemChart } from "./ns/ai-base/index.js";
 import { ArcRunnersChart } from "./ns/arc-runners/index.js";
 import { ArgocdChart } from "./ns/argocd/index.js";
 import { EnvoyGatewaySystemChart } from "./ns/envoy-gateway-system/index.js";
+import { KubeSystemChart } from "./ns/kube-system/index.js";
 import { LonghornSystemChart } from "./ns/longhorn-system/index.js";
 import { MetallbSystemChart } from "./ns/metallb-system/index.js";
 import { MonitoringChart } from "./ns/monitoring/index.js";
@@ -21,6 +22,7 @@ function buildApp(): App {
   new ArcRunnersChart( app );
   new MonitoringChart( app );
   new AIBaseSystemChart( app );
+  new KubeSystemChart( app );
 
   return app;
 }
