@@ -42,6 +42,7 @@ export class AIBaseSystemChart extends Chart {
       },
       env: {
         LANGFLOW_AUTO_LOGIN: "true",
+        LANGFLOW_SSRF_ALLOWED_HOSTS: "192.168.0.0/22,*.home.internal",
       },
       service: {
         ports: {

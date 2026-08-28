@@ -39,6 +39,7 @@ spec:
               main:
                 env:
                   LANGFLOW_AUTO_LOGIN: "true"
+                  LANGFLOW_SSRF_ALLOWED_HOSTS: 192.168.0.0/22,*.home.internal
                 image:
                   repository: docker.io/langflowai/langflow
                   tag: 1.11.5
