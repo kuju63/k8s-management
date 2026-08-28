@@ -92,7 +92,7 @@ CronJob/Job/ConfigMap/HTTPRoute 等、専用ヘルパーの無いリソースは
 
 ### Secret の扱い
 
-SOPS/sealed-secrets/external-secrets のような暗号化・外部連携の仕組みは導入していない。`manifests/`は git 管理対象のため、**Secret の実体（`stringData`/`data`）をコードに書いてはいけない**。コード側は事前に `kubectl` 等で作成済みの Secret 名のみを参照する（`packages/ns/arc-runners/index.ts` が実例）。
+`manifests/`は git 管理対象のため、**Secret の実体（`stringData`/`data`）を平文でコードに書いてはいけない**。正式な運用として sealed-secrets を導入しており（コントローラは `kube-system` に sync）、`packages/lib/sealed-secret.ts` の `createSealedSecret` で `kubeseal` 済みの `SealedSecret` をコードに宣言し、git にコミットする。SOPS/external-secrets のような他の暗号化・外部連携の仕組みは導入していない。素の Secret を `kubectl` 等で手動作成し、コード側は Secret 名のみを参照する方法（`packages/ns/arc-runners/index.ts` が実例）は、コントローラ未導入時のブートストラップ等に限った代替手段。
 詳細は [docs/config-and-secrets.md](docs/config-and-secrets.md)。
 
 ### ブートストラップ順序の制約
