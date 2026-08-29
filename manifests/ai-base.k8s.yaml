@@ -53,6 +53,17 @@ spec:
                         requests:
                           cpu: 100m
                           memory: 512Mi
+                  replicas: 3
+              initContainers:
+                initConfigDir:
+                  command:
+                    - sh
+                    - -c
+                    - chown -R 1000:0 /data/config && mkdir -p /data/fs
+                  image: docker.io/library/alpine:latest
+                  volumeMounts:
+                    - mountPath: /data
+                      name: data
               nameOverride: langflow
               persistence:
                 data:
