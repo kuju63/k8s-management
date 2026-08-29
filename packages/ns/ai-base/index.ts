@@ -55,8 +55,12 @@ export class AIBaseSystemChart extends Chart {
           },
           initContainers: {
             initConfigDir: {
-              image: "docker.io/library/alpine:latest",
-              command: [ "sh", "-c", "chown -R 1000:0 /data/config && mkdir -p /data/fs" ],
+              image: "docker.io/library/debian:latest",
+              command: [
+                "sh",
+                "-c",
+                "mkdir -p /dats/config && mkdir -p /data/fs && chown -R 1000:0 /data/config && chown -R 1000:0 /data/fs",
+              ],
               volumeMounts: [ { name: "data", mountPath: "/data" } ],
             },
           },

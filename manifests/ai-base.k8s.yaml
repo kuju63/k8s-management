@@ -52,8 +52,8 @@ spec:
                   command:
                     - sh
                     - -c
-                    - chown -R 1000:0 /data/config && mkdir -p /data/fs
-                  image: docker.io/library/alpine:latest
+                    - mkdir -p /dats/config && mkdir -p /data/fs && chown -R 1000:0 /data/config && chown -R 1000:0 /data/fs
+                  image: docker.io/library/debian:latest
                   volumeMounts:
                     - mountPath: /data
                       name: data
