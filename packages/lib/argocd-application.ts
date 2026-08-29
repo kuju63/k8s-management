@@ -195,6 +195,7 @@ export interface EnvFromSource {
   readonly prefix?: string;
 }
 
+export type AccessMode = "ReadWriteOnce" | "ReadOnlyMany" | "ReadWriteMany" | "ReadWriteOncePod";
 /**
  * `createContainerApplication` の永続化ボリューム1件分の指定。
  * `persistence` オブジェクトのキーがマウント識別子（および Volume 名）になる。
@@ -204,7 +205,7 @@ export type PersistenceVolume =
       /** 新規に PersistentVolumeClaim を作成してマウントする。 */
       readonly type: "persistentVolumeClaim";
       /** PVC の AccessMode（例: `ReadWriteOnce`）。 */
-      readonly accessMode: string;
+      readonly accessMode: AccessMode;
       /** 要求するストレージ容量（例: `1Gi`）。 */
       readonly size: string;
       /** StorageClass。省略時はクラスタのデフォルトプロビジョナーが使われる。 */
