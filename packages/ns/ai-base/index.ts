@@ -78,16 +78,6 @@ export class AIBaseSystemChart extends Chart {
               ],
             },
           },
-          resources: {
-            limits: {
-              cpu: "500m",
-              memory: "2Gi",
-            },
-            requests: {
-              cpu: "100m",
-              memory: "512Mi",
-            },
-          },
           service: {
             ports: {
               http: { port: 7860 },

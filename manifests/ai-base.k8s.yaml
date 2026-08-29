@@ -46,13 +46,6 @@ spec:
                       image:
                         repository: docker.io/langflowai/langflow
                         tag: 1.11.5
-                      resources:
-                        limits:
-                          cpu: 500m
-                          memory: 2Gi
-                        requests:
-                          cpu: 100m
-                          memory: 512Mi
                   replicas: 1
               initContainers:
                 initConfigDir:
