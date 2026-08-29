@@ -52,6 +52,13 @@ export class AIBaseSystemChart extends Chart {
             LANGFLOW_SAVE_DB_IN_CONFIG_DIR: "True",
             LANGFLOW_CONFIG_DIR: "/data/config",
           },
+          initContainers: {
+            initConfigDir: {
+              image: "docker.io/library/alpine:latest",
+              command: [ "sh", "-c", "chown -R 1000:0 /data/config && mkdir -p /data/fs" ],
+              volumeMounts: [ { name: "data", mountPath: "/data" } ],
+            },
+          },
           persistence: {
             data: {
               type: "persistentVolumeClaim",

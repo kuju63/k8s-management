@@ -274,9 +274,9 @@ export type ContainerControllerType = "deployment" | "statefulset";
 
 /** `createContainerApplication` のプロパティ。 */
 export interface ContainerApplicationProps {
-  /** ArgoCD Application 名（= リソース名）。生成されるワークロード/Service/PVC 等の名前にもなる。 */
+  /** Application名。`nameOverride` として使われ、`app-template` の fullname に反映される。 */
   readonly name: string;
-  /** インストール先 namespace。 */
+  /** インストール先 namespace。ArgoCD がリソースをデプロイする場所。 */
   readonly namespace: string;
   /** Application を所属させる AppProject 名。省略時は `default`。 */
   readonly project?: string;
@@ -316,12 +316,32 @@ export interface ContainerApplicationProps {
   readonly persistence?: Record< string, PersistenceVolume >;
   /** 公開する Service。省略時は Service を作成しない。 */
   readonly service?: ContainerServiceProps;
-
   /**
    * 起動するPod数。省略時は app-template チャートのデフォルト（1）が使われる。
    * rolling update や高可用性が必要な場合は、明示的に2以上を指定すること。
    */
   readonly replicas?: number;
+
+  /**
+   * init Container。app-template チャートの `initContainers` テンプレート
+   * に対応し、キー名は生成される Kubernetes リソースのマウント識別子になる。
+   */
+  readonly initContainers?: Record< string, InitContainerValues >;
+}
+
+/**
+ * init Container の指定。app-template チャートの init container テンプレート
+ * に渡す値を構造化する最小限のインターフェース。
+ */
+export interface InitContainerValues {
+  /** コンテナイメージ。 */
+  readonly image: string;
+  /** コンテナのエントリポイント。省略時は初めから `command` を指定する。 */
+  readonly command?: readonly string[];
+  /** コンテナに渡す引数。 */
+  readonly args?: readonly string[];
+  /** volumeMount。PVC 等のマウント識別子は `persistence` に定義済みキーと同じものを使う。 */
+  readonly volumeMounts?: ReadonlyArray< { name: string; mountPath: string; readOnly?: boolean } >;
 }
 
 /**
@@ -380,6 +400,9 @@ export function buildContainerValuesObject( props: ContainerValuesProps ): Recor
   if ( props.persistence !== undefined ) {
     valuesObject.persistence = buildPersistence( props.persistence );
   }
+  if ( props.initContainers !== undefined ) {
+    valuesObject.initContainers = buildInitContainers( props.initContainers );
+  }
   if ( props.service !== undefined ) {
     valuesObject.service = {
       main: { controller: "main", ports: props.service.ports },
@@ -392,6 +415,30 @@ function buildImage( image: ContainerImage ): Record< string, unknown > {
   const out: Record< string, unknown > = { repository: image.repository, tag: image.tag };
   if ( image.pullPolicy !== undefined ) {
     out.pullPolicy = image.pullPolicy;
+  }
+  return out;
+}
+
+function buildInitContainerItem( init: InitContainerValues ): Record< string, unknown > {
+  const item: Record< string, unknown > = { image: init.image };
+  if ( init.command !== undefined ) {
+    item.command = init.command;
+  }
+  if ( init.args !== undefined ) {
+    item.args = init.args;
+  }
+  if ( init.volumeMounts !== undefined ) {
+    item.volumeMounts = init.volumeMounts;
+  }
+  return item;
+}
+
+export function buildInitContainers(
+  initContainers: Record< string, InitContainerValues >,
+): Record< string, unknown > {
+  const out: Record< string, unknown > = {};
+  for ( const [ key, init ] of Object.entries( initContainers ) ) {
+    out[ key ] = buildInitContainerItem( init );
   }
   return out;
 }
