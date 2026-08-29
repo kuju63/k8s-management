@@ -46,6 +46,7 @@ export class AIBaseSystemChart extends Chart {
     const langflowSecret = createSealedSecret( this, {
       name: "langflow-secret",
       namespace: NAMESPACE,
+
       encryptedData: {
         LANGFLOW_DATABASE_URL:
           "AgAQ0CG5b+zfAS64SD8UivUsfQm4zIv1si+yAwKQMXnU2G41wEHSo1Gz61C0yMwoz/oF/egggiWaahP7sa1QiejMskdzYECfRrOTjykD3yg4aOp/7E5DSGYfRgnO2MSPS5+j9L7U+WkyWXiRXHCJ5hrElhqmS+vwC0FX6ljs88qaqoPMMkH0RkyHgIJKYNFmI4UoCGFD5Q+DsWNsGrEHr3jetp/3uYtfyuohj8WBHEGMfLgjqDrQFe8y1Hryu177MLRD6aBVOSwmNRihU5CUuIoD9Q0WnnT1zsz/EtaNgxx0r6SyVaS0GsS0g4nPwoGE8KeSHPoA4FMqfus62nmdr80yy1cBQmMbsuYEnQ7SBfJC299eAL/aZVT1FCBTLb34TtgYyZu1U5hw1B0OjLBOc6AE98Cq51fuD0SUk8Af3l2mEZnOHG5jF9c3gQKFHZcIQqtfK2h3PFMi1wbvpi1w+aYUX17UwZKj4RiEFDMzTweHKLJ+BEmDKnd1W3rB9vmWo7cZWHw2bxcBYlcBWEqT6E/YTpicuCb+GGMCuWbYJCIg+c88SLJ2XbudEBd62uLI8XFp30oqg01IV6lUAoDAGLL2mwvb+2+LliuEVGIMacGVO6H03swUQkJAE2Gzd/z33hlZenqIExA9Zsoz5L8Jcza5jN5fFGkdPEIVehbQ/Y6ezIr6qF/bV49ILlfZ0NgYPoN+cbHgHVf/H6L3tgT7S2RIRNghNMFwkBx/h/yNnKwrFGQQLJFjsKufWcVqjGnPueLh4O2jqGjQe++3qhgQ4g==",
@@ -64,7 +65,7 @@ export class AIBaseSystemChart extends Chart {
           controllerType: "statefulset",
           image: {
             repository: "registry.access.redhat.com/hi/postgresql",
-            tag: "sha256:c811c689db21e3796160f5c9403862a685be58ce0692e85f05afd12c025a8bf3",
+            tag: "18.6",
           },
           envFrom: [ { secretRef: { name: secret.name } } ],
           persistence: {

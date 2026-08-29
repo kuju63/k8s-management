@@ -64,7 +64,7 @@ spec:
                             name: langflow-postgresql
                       image:
                         repository: registry.access.redhat.com/hi/postgresql
-                        tag: sha256:c811c689db21e3796160f5c9403862a685be58ce0692e85f05afd12c025a8bf3
+                        tag: "18.6"
                       probes:
                         liveness:
                           custom: true
@@ -142,6 +142,7 @@ spec:
   template:
     metadata:
       name: "{{ .name }}"
+      namespace: "{{ .namespace }}"
     spec:
       destination:
         namespace: ai-base
