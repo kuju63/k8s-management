@@ -19,45 +19,152 @@ spec:
   sourceRepos:
     - ghcr.io/bjw-s-labs/helm
 ---
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
 metadata:
-  name: langflow
+  name: langflow-postgresql
+  namespace: ai-base
+name: langflow-postgresql
+namespace: ai-base
+spec:
+  encryptedData:
+    POSTGRES_PASSWORD: AgA0duwegXv1yaOF2Ad9ljSV6DiXuYNcCvUagW/q31SQlCZM2lrZcarOHT9Nelso/0FgWUrThXzOS+ki7MYIVyECEtzTl6FBimYt59nVMIBCc0AiLA14Y/pVGsZ/1eFi3MIa/TfgbXmYRe98UpyF+fm/zCuY4s+Fea1hoOvq6WDHgKejUkXdGIvx0DxHLCwsea9RedLvvJmmVMC882/t193s1UxRNjGyCxciPKK5WKUtwPtxAFK38LSWAhCvUP8jY8htb9UZcIIXKFSaM6jjru4dMZdSIcsGi+F3cafMcCNWre4fw5QmneiN+gCdp4htY+ESCtccpeJF+fWnnPmfJACWaHLJx93cyWo0FiF5GY9p00HzJ5WmzpKF8kk2bB7/CdZ8wg7Ansqp053zSmdF2dKTgZbTWrMqv874alzX0UtfBRNMRtOPpf4kj88GhZveKeJnNUwiwFMzyMl8GBJF8wM/h2Kx2jn+xVqHYwKtt/vOqVjDGXT43z89m0XzlTSgfj+jNXruavrnZk0XT+PiKbhkuJtZ8+sc0tjZBSzLkPbXgIXJa/YJVOhLm5FFXkozvfppUkRhPxuvmzeJ4pSbxOM02oKjKRjAXBA23joiwrQdaXmnIr1Q5YJFBpZv+L/J7NAx7PrFTLTcWszdkW4+/ommGDY2YA4Z/sXgATbIIwWFIH1+6D3jwCkjWQnwaurr4V1rKUDmKbQ5F0QC5ad5sUkMgA==
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: langflow-secret
+  namespace: ai-base
+name: langflow-secret
+namespace: ai-base
+spec:
+  encryptedData:
+    LANGFLOW_DATABASE_URL: AgAQ0CG5b+zfAS64SD8UivUsfQm4zIv1si+yAwKQMXnU2G41wEHSo1Gz61C0yMwoz/oF/egggiWaahP7sa1QiejMskdzYECfRrOTjykD3yg4aOp/7E5DSGYfRgnO2MSPS5+j9L7U+WkyWXiRXHCJ5hrElhqmS+vwC0FX6ljs88qaqoPMMkH0RkyHgIJKYNFmI4UoCGFD5Q+DsWNsGrEHr3jetp/3uYtfyuohj8WBHEGMfLgjqDrQFe8y1Hryu177MLRD6aBVOSwmNRihU5CUuIoD9Q0WnnT1zsz/EtaNgxx0r6SyVaS0GsS0g4nPwoGE8KeSHPoA4FMqfus62nmdr80yy1cBQmMbsuYEnQ7SBfJC299eAL/aZVT1FCBTLb34TtgYyZu1U5hw1B0OjLBOc6AE98Cq51fuD0SUk8Af3l2mEZnOHG5jF9c3gQKFHZcIQqtfK2h3PFMi1wbvpi1w+aYUX17UwZKj4RiEFDMzTweHKLJ+BEmDKnd1W3rB9vmWo7cZWHw2bxcBYlcBWEqT6E/YTpicuCb+GGMCuWbYJCIg+c88SLJ2XbudEBd62uLI8XFp30oqg01IV6lUAoDAGLL2mwvb+2+LliuEVGIMacGVO6H03swUQkJAE2Gzd/z33hlZenqIExA9Zsoz5L8Jcza5jN5fFGkdPEIVehbQ/Y6ezIr6qF/bV49ILlfZ0NgYPoN+cbHgHVf/H6L3tgT7S2RIRNghNMFwkBx/h/yNnKwrFGQQLJFjsKufWcVqjGnPueLh4O2jqGjQe++3qhgQ4g==
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: langflow-set
   namespace: argocd
 spec:
-  destination:
-    namespace: ai-base
-    server: https://kubernetes.default.svc
-  project: ai-base
-  source:
-    chart: app-template
-    helm:
-      valuesObject:
-        controllers:
-          main:
-            containers:
-              main:
-                env:
-                  LANGFLOW_AUTO_LOGIN: "true"
-                  LANGFLOW_SSRF_ALLOWED_HOSTS: 192.168.0.0/22,*.home.internal
-                image:
-                  repository: docker.io/langflowai/langflow
-                  tag: 1.11.5
-        nameOverride: langflow
-        service:
-          main:
-            controller: main
-            ports:
-              http:
-                port: 7860
-    repoURL: ghcr.io/bjw-s-labs/helm
-    targetRevision: 5.1.0
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - ServerSideApply=true
+  generators:
+    - list:
+        elements:
+          - chart: app-template
+            name: langflow-postgresql
+            repoURL: ghcr.io/bjw-s-labs/helm
+            targetRevision: 5.1.0
+            valuesObject:
+              controllers:
+                main:
+                  containers:
+                    main:
+                      envFrom:
+                        - secretRef:
+                            name: langflow-postgresql
+                      image:
+                        repository: registry.access.redhat.com/hi/postgresql
+                        tag: sha256:c811c689db21e3796160f5c9403862a685be58ce0692e85f05afd12c025a8bf3
+                      probes:
+                        liveness:
+                          custom: true
+                          enabled: true
+                          spec:
+                            exec:
+                              command:
+                                - pg_isready
+                            failureThreshold: 6
+                            periodSeconds: 30
+                            timeoutSeconds: 5
+                        readiness:
+                          custom: true
+                          enabled: true
+                          spec:
+                            exec:
+                              command:
+                                - pg_isready
+                            periodSeconds: 10
+                            timeoutSeconds: 5
+                        startup:
+                          custom: true
+                          enabled: true
+                          spec:
+                            exec:
+                              command:
+                                - pg_isready
+                            failureThreshold: 60
+                            periodSeconds: 5
+                  type: statefulset
+              nameOverride: langflow-postgresql
+              persistence:
+                data:
+                  accessMode: ReadWriteOnce
+                  globalMounts:
+                    - path: /var/lib/postgresql
+                  retain: true
+                  size: 10Gi
+                  storageClass: longhorn
+                  type: persistentVolumeClaim
+              service:
+                main:
+                  controller: main
+                  ports:
+                    postgresql:
+                      port: 5432
+          - chart: app-template
+            name: langflow
+            repoURL: ghcr.io/bjw-s-labs/helm
+            targetRevision: 5.1.0
+            valuesObject:
+              controllers:
+                main:
+                  containers:
+                    main:
+                      env:
+                        LANGFLOW_AUTO_LOGIN: "true"
+                        LANGFLOW_SSRF_ALLOWED_HOSTS: 192.168.0.0/22,*.home.internal
+                      envFrom:
+                        - secretRef:
+                            name: langflow-secret
+                      image:
+                        repository: docker.io/langflowai/langflow
+                        tag: 1.11.5
+              nameOverride: langflow
+              service:
+                main:
+                  controller: main
+                  ports:
+                    http:
+                      port: 7860
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  template:
+    metadata:
+      name: "{{ .name }}"
+    spec:
+      destination:
+        namespace: ai-base
+        server: https://kubernetes.default.svc
+      project: ai-base
+      source:
+        chart: "{{ .chart }}"
+        repoURL: "{{ .repoURL }}"
+        targetRevision: "{{ .targetRevision }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true
+  templatePatch: |-
+    {{- with .valuesObject }}
+    spec:
+      source:
+        helm:
+          valuesObject:
+    {{ . | toYaml | nindent 8 }}
+    {{- end }}
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute

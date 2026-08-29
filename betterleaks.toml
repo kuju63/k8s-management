@@ -1,0 +1,13 @@
+# betterleaks: kubeseal 暗号化済み Sealed Secret を検出対象外にする
+#
+# Secret の値は kubeseal が base64url で圧縮したペイロード（"Ag" で始まる）に暗号化される。
+# この圧縮値が generic-api-key 等で誤検出（false positive）されるため、
+# "Ag" 開頭の kubeseal ペイロードを permit 一覧に登録し除外する。
+#
+# betterleaks は gitleaks の設定スキーマをそのまま利用するため、[allowlist] セクション
+# へ regexes（正規表現一覧）を登録できる。
+
+[allowlist]
+regexes = [
+    "Ag",
+]

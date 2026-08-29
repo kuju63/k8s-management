@@ -1,6 +1,6 @@
 export default {
   // ---- 1. すべてのファイルで betterleaks を実行 ----
-  "*": [ "betterleaks dir" ],
+  "*": [ "betterleaks dir --config betterleaks.toml" ],
 
   // ---- 2. JS/TS ファイル → biome format + lint ----
   "*.{js,ts,jsx,tsx}": [ "pnpm exec biome check" ],
