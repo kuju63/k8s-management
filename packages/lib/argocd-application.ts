@@ -316,6 +316,12 @@ export interface ContainerApplicationProps {
   readonly persistence?: Record< string, PersistenceVolume >;
   /** 公開する Service。省略時は Service を作成しない。 */
   readonly service?: ContainerServiceProps;
+
+  /**
+   * 起動するPod数。省略時は app-template チャートのデフォルト（1）が使われる。
+   * rolling update や高可用性が必要な場合は、明示的に2以上を指定すること。
+   */
+  readonly replicas?: number;
 }
 
 /**
@@ -358,6 +364,7 @@ export function buildContainerValuesObject( props: ContainerValuesProps ): Recor
   }
 
   const controller: Record< string, unknown > = {
+    replicas: props.replicas,
     containers: { main: container },
   };
   if ( props.controllerType !== undefined ) {
