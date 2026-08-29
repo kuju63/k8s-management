@@ -317,6 +317,69 @@ export interface ContainerApplicationProps {
   readonly service?: ContainerServiceProps;
 }
 
+/**
+ * app-template チャート本体のバージョン。`createContainerApplication` や
+ * `createHelmApplicationSet` の container エントリが内部で使用する固定値。
+ */
+export const APP_TEMPLATE_TARGET_REVISION = "5.1.0";
+
+/**
+ * `createContainerApplication` が受け取るプロパティのうち、app-template の
+ * `valuesObject` を構築するために必要な部分（namespace/project を除く）。
+ */
+export type ContainerValuesProps = Omit< ContainerApplicationProps, "namespace" | "project" >;
+
+/**
+ * コンテナ指定を app-template チャートの `valuesObject` へ変換する。
+ * `createContainerApplication` と、ApplicationSet の container エントリで共有する。
+ */
+export function buildContainerValuesObject( props: ContainerValuesProps ): Record< string, unknown > {
+  const container: Record< string, unknown > = {
+    image: buildImage( props.image ),
+  };
+  if ( props.command !== undefined ) {
+    container.command = props.command;
+  }
+  if ( props.args !== undefined ) {
+    container.args = props.args;
+  }
+  if ( props.resources !== undefined ) {
+    container.resources = props.resources;
+  }
+  if ( props.probes !== undefined ) {
+    container.probes = props.probes;
+  }
+  if ( props.env !== undefined ) {
+    container.env = buildEnv( props.env );
+  }
+  if ( props.envFrom !== undefined ) {
+    container.envFrom = props.envFrom;
+  }
+
+  const controller: Record< string, unknown > = {
+    containers: { main: container },
+  };
+  if ( props.controllerType !== undefined ) {
+    controller.type = props.controllerType;
+  }
+
+  const valuesObject: Record< string, unknown > = {
+    nameOverride: props.name,
+    controllers: {
+      main: controller,
+    },
+  };
+  if ( props.persistence !== undefined ) {
+    valuesObject.persistence = buildPersistence( props.persistence );
+  }
+  if ( props.service !== undefined ) {
+    valuesObject.service = {
+      main: { controller: "main", ports: props.service.ports },
+    };
+  }
+  return valuesObject;
+}
+
 function buildImage( image: ContainerImage ): Record< string, unknown > {
   const out: Record< string, unknown > = { repository: image.repository, tag: image.tag };
   if ( image.pullPolicy !== undefined ) {
@@ -442,56 +505,12 @@ function buildPersistence( persistence: Record< string, PersistenceVolume > ): R
  * ```
  */
 export function createContainerApplication( chart: Chart, id: string, props: ContainerApplicationProps ): ApiObject {
-  const container: Record< string, unknown > = {
-    image: buildImage( props.image ),
-  };
-  if ( props.command !== undefined ) {
-    container.command = props.command;
-  }
-  if ( props.args !== undefined ) {
-    container.args = props.args;
-  }
-  if ( props.resources !== undefined ) {
-    container.resources = props.resources;
-  }
-  if ( props.probes !== undefined ) {
-    container.probes = props.probes;
-  }
-  if ( props.env !== undefined ) {
-    container.env = buildEnv( props.env );
-  }
-  if ( props.envFrom !== undefined ) {
-    container.envFrom = props.envFrom;
-  }
-
-  const controller: Record< string, unknown > = {
-    containers: { main: container },
-  };
-  if ( props.controllerType !== undefined ) {
-    controller.type = props.controllerType;
-  }
-
-  const valuesObject: Record< string, unknown > = {
-    nameOverride: props.name,
-    controllers: {
-      main: controller,
-    },
-  };
-  if ( props.persistence !== undefined ) {
-    valuesObject.persistence = buildPersistence( props.persistence );
-  }
-  if ( props.service !== undefined ) {
-    valuesObject.service = {
-      main: { controller: "main", ports: props.service.ports },
-    };
-  }
-
   return createHelmApplication( chart, id, {
     name: props.name,
     namespace: props.namespace,
     project: props.project ?? "default",
     repoUrl: APP_TEMPLATE_REPO_URL,
-    targetRevision: "5.1.0",
-    valuesObject,
+    targetRevision: APP_TEMPLATE_TARGET_REVISION,
+    valuesObject: buildContainerValuesObject( props ),
   } );
 }

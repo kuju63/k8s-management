@@ -307,11 +307,18 @@ Ingress/HTTPRoute はこのヘルパーの対象外。外部公開が必要な�
 「HTTPRoute を追加する」の手順に従い、同じ Chart 内に生の `ApiObject` として
 追加すること。
 
-## `createHelmApplicationSet` で複数の Helm Application を管理する
+## `createHelmApplicationSet` で複数の Application を管理する
 
-同じ namespace に複数の Helm チャートを導入する場合は、
-`createHelmApplicationSet` を使用できる。個別の `createHelmApplication` 呼び出しを
-並べる代わりに、List generator の各要素から1つずつ Application を生成する。
+同じ namespace に複数のアプリを導入する場合は、`createHelmApplicationSet` を
+使用できる。個別の呼び出しを並べる代わりに、List generator の各要素から1つずつ
+Application を生成する。Helm チャートとコンテナのどちらも扱える。
+
+各要素は `kind` で判別する。`kind` を省略するか `"helm"` を指定すると upstream
+Helm チャートになり、`createHelmApplication` と同じフィールドを受け取る。
+`"container"` を指定するとコンテナイメージから app-template で生成する
+ワークロードになり、`createContainerApplication` と同じフィールドを受け取る。
+`kind` によって受け付けるフィールドが静的に切り替わる。このため Helm 要素に
+`image` を渡すなどの誤りはコンパイル時に検出できる。
 
 ```ts
 import { createHelmApplicationSet } from "../../lib/argocd-applicationset.js";
@@ -334,13 +341,24 @@ createHelmApplicationSet(this, "observability-applications", {
                 replicaCount: 2,
             },
         },
+        {
+            kind: "container",
+            name: "example-worker",
+            image: { repository: "ghcr.io/example-org/worker", tag: "1.0.0" },
+            env: { LOG_LEVEL: "info" },
+        },
     ],
 });
 ```
 
-`repoUrl` と `chart` の指定方法は `createHelmApplication` と同じ。通常の Helm
-リポジトリでは `chart` が必須となる。OCI URL ではチャート名を含む `repoUrl` を
+Helm 要素の `repoUrl` と `chart` の指定方法は `createHelmApplication` と同じ。通常の
+Helm リポジトリでは `chart` が必須となる。OCI URL ではチャート名を含む `repoUrl` を
 渡せば `chart` を省略できる。
+
+コンテナ要素は `createContainerApplication` と同じフィールド（`image` / `env` /
+`persistence` / `service` など）を受け取る。内部で app-template チャートの
+`valuesObject` へ変換する。`targetRevision` は app-template チャート自体の
+バージョンで、省略時は既定値を使う。アプリのバージョンは `image.tag` 側で指定する。
 
 ApplicationSet の通常のテンプレート置換は文字列型フィールドに限られる。
 このため、オブジェクトである `valuesObject` は Go template の `templatePatch` を
