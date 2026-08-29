@@ -177,7 +177,7 @@ export function createHelmApplicationSet( chart: Chart, id: string, props: HelmA
     goTemplateOptions: [ "missingkey=error" ],
     generators: [ { list: { elements } } ],
     template: {
-      metadata: { name: "{{ .name }}", namespace: "{{ .namespace }}" },
+      metadata: { name: "{{ .name }}" },
       spec: {
         project: props.project ?? "default",
         source: {

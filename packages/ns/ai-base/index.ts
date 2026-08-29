@@ -4,12 +4,10 @@ import { createAppProject } from "../../lib/argocd-project.js";
 import { CLUSTER_DOMAIN } from "../../lib/config.js";
 import { createHTTPRoute } from "../../lib/gateway-api.js";
 import { createNamespace } from "../../lib/namespace.js";
-import { createSealedSecret } from "../../lib/sealed-secret.js";
 
 const NAMESPACE = "ai-base";
 const STACK_NAME = "langflow";
 const PROJECT_NAME = "ai-base";
-const PG_NAME = "langflow-postgresql";
 
 /**
  * ns: ai-base

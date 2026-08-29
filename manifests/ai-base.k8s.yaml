@@ -75,7 +75,6 @@ spec:
   template:
     metadata:
       name: "{{ .name }}"
-      namespace: "{{ .namespace }}"
     spec:
       destination:
         namespace: ai-base
