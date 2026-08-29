@@ -61,9 +61,11 @@ export class AIBaseSystemChart extends Chart {
               globalMounts: [
                 {
                   path: "/data/fs",
+                  readOnly: false,
                 },
                 {
                   path: "/data/config",
+                  readOnly: false,
                 },
               ],
             },

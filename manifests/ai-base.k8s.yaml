@@ -59,7 +59,9 @@ spec:
                   accessMode: ReadWriteOnce
                   globalMounts:
                     - path: /data/fs
+                      readOnly: false
                     - path: /data/config
+                      readOnly: false
                   size: 10Gi
                   storageClass: longhorn
                   type: persistentVolumeClaim
