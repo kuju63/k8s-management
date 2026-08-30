@@ -53,16 +53,9 @@ export class AIBaseSystemChart extends Chart {
             LANGFLOW_SAVE_DB_IN_CONFIG_DIR: "True",
             LANGFLOW_CONFIG_DIR: "/data/config",
           },
-          initContainers: {
-            initConfigDir: {
-              image: "docker.io/library/debian:latest",
-              command: [
-                "sh",
-                "-c",
-                "mkdir -p /dats/config && mkdir -p /data/fs && chown -R 1000:0 /data/config && chown -R 1000:0 /data/fs",
-              ],
-              volumeMounts: [ { name: "data", mountPath: "/data" } ],
-            },
+          podSecurityContext: {
+            fsGroup: 0,
+            fsGroupChangePolicy: "OnRootMismatch",
           },
           persistence: {
             data: {

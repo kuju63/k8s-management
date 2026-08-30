@@ -46,17 +46,11 @@ spec:
                       image:
                         repository: docker.io/langflowai/langflow
                         tag: 1.11.5
+                  pod:
+                    securityContext:
+                      fsGroup: 0
+                      fsGroupChangePolicy: OnRootMismatch
                   replicas: 1
-              initContainers:
-                initConfigDir:
-                  command:
-                    - sh
-                    - -c
-                    - mkdir -p /dats/config && mkdir -p /data/fs && chown -R 1000:0 /data/config && chown -R 1000:0 /data/fs
-                  image: docker.io/library/debian:latest
-                  volumeMounts:
-                    - mountPath: /data
-                      name: data
               nameOverride: langflow
               persistence:
                 data:
