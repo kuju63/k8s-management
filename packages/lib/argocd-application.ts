@@ -246,6 +246,20 @@ export interface ContainerServiceProps {
   readonly ports: Record< string, { readonly port: number } >;
 }
 
+/**
+ * `createContainerApplication` の `controllers.main.pod.securityContext`。
+ * workload の Pod レベル securityContext（`fsGroup` 等）を指定するための最小限のインターフェース。
+ */
+export interface PodSecurityContext {
+  /** Pod 内の全コンテナに適用される補足グループ。`fsGroup` として PVC の所有権変更や setgid に使われる。 */
+  readonly fsGroup?: number;
+  /**
+   * ボリュームの所有権・パーミッション変更の挙動。`OnRootMismatch` を指定すると、
+   * 既存のルートの所有権と一致しない場合のみ再帰処理を行い、新規 PVC 作成時の誤リマップを抑制できる。
+   */
+  readonly fsGroupChangePolicy?: string;
+}
+
 /** `createContainerApplication` のコンテナprobe指定。 */
 export interface ContainerProbeProps {
   /** probeを有効化する。 */
@@ -327,6 +341,12 @@ export interface ContainerApplicationProps {
    * に対応し、キー名は生成される Kubernetes リソースのマウント識別子になる。
    */
   readonly initContainers?: Record< string, InitContainerValues >;
+
+  /**
+   * workload の `controllers.main.pod.securityContext`。
+   * PVC 等へ `fsGroup` を適用し、非 root コンテナから書き込みできる所有者を変更する。
+   */
+  readonly podSecurityContext?: PodSecurityContext;
 }
 
 /**
@@ -402,6 +422,9 @@ export function buildContainerValuesObject( props: ContainerValuesProps ): Recor
   }
   if ( props.initContainers !== undefined ) {
     valuesObject.initContainers = buildInitContainers( props.initContainers );
+  }
+  if ( props.podSecurityContext !== undefined ) {
+    controller.pod = { securityContext: props.podSecurityContext };
   }
   if ( props.service !== undefined ) {
     valuesObject.service = {
