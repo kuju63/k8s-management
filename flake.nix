@@ -32,6 +32,9 @@
             echo "  gh:          $(gh --version | head -n1)"
             echo "  betterleaks: $(betterleaks version)"
             echo "  kubectl:     $(kubectl version --client --output=yaml | head -n2 | tail -n1)"
+            echo "  helm         $(helm version)"
+            echo "  kubeseal     $(kubeseal --version)"
+            pnpm install
           '';
         };
       });
