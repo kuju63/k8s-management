@@ -9,9 +9,7 @@ NAS 上のサブディレクトリを分けることで、複数のアプリが�
 
 csi-driver-nfs（`nfs.csi.k8s.io`）は、NFSv4 を未対応のため、
 `mountOptions`（`nfsvers=4.1`）指定することで対応する。
-認証 NAS を使っているので UID（`1001`）認証でマウント可能だが、csi-driver-nfs は
-KMS を要求するため、`auth.mode` を `kms` に指定している。`.ephemeral` も指定しないと
-マウントができない点に注意する。
+認証 NAS を使っているので UID（`1001`）認証でマウントしている。
 
 ## アーキテクチャ
 
