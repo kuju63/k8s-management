@@ -27,3 +27,15 @@ export const GATEWAY_NAMESPACE = "envoy-gateway-system";
 
 /** MetalLB が払い出す LoadBalancer IP のレンジ（クラスタ構成図ノートで確保した範囲）。 */
 export const METALLB_ADDRESS_RANGE = "192.168.2.200-192.168.2.250";
+
+/** NAS が公開する NFS 共有サーバーのアドレス。csi-driver-nfs の `parameters.server` で使う。 */
+export const NFS_SERVER_ADDRESS = "192.168.1.116";
+
+/** NAS が公開する NFS 共有の共有パス。csi-driver-nfs の `parameters.share` で使う。 */
+export const NFS_SHARE_PATH = "/k8s-shared";
+
+/**
+ * NAS の NFS エクスポートにマッピングされる UID（`no_root_squash` 環境で
+ * `k8s-shared` へ書き込み権を与えるユーザーID）。csi-driver-nfs の `parameters.uid` で指定する。
+ */
+export const NFS_UID = "1001";

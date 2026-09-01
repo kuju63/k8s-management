@@ -13,7 +13,7 @@ ij_formatter_off_tag = @formatter:off
 ij_formatter_on_tag = @formatter:on
 ij_formatter_tags_enabled = true
 ij_smart_tabs = false
-ij_visual_guides = 
+ij_visual_guides =
 ij_wrap_on_typing = false
 
 [{*.ats,*.cts,*.mts,*.ts}]
@@ -112,7 +112,7 @@ ij_typescript_prefer_explicit_types_function_expression_returns = false
 ij_typescript_prefer_explicit_types_function_returns = false
 ij_typescript_prefer_explicit_types_vars_fields = false
 ij_typescript_prefer_parameters_wrap = false
-ij_typescript_property_prefix = 
+ij_typescript_property_prefix =
 ij_typescript_reformat_c_style_comments = false
 ij_typescript_space_after_colon = true
 ij_typescript_space_after_comma = true
@@ -239,6 +239,7 @@ insert_final_newline = true
 [*.md]
 indent_size = 4
 insert_final_newline = true
+max_line_length = 120
 
 [*.nix]
 indent_size = 2
