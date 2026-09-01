@@ -23,7 +23,7 @@ spec:
             - effect: NoSchedule
               key: node-role.kubernetes.io/control-plane
               operator: Exists
-    repoURL: https://kubernetes-csi.github.io/nfs-csi
+    repoURL: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
     targetRevision: v4.13.4
   syncPolicy:
     automated:
