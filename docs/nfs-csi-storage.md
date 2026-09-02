@@ -3,61 +3,92 @@
 ## 概要
 
 このリポジトリは、NAS（`192.168.1.116`）が公開する NFS4.1 を共有ストレージとして使い、
-`ReadWriteMany`（複数 Pod が同時に読み書き可能な PVC）を提供する。PVC ごとに
-NAS 上のサブディレクトリを分けることで、複数のアプリが共有の NFS エクスポートを
-共有できる。
+`ReadWriteMany`（複数 Pod が同時に読み書き可能な PVC）を提供する。NAS 側は全 PVC で
+共通の1つの共有フォルダ（`/k8s-shared`）しか公開していない。そのため StorageClass の
+`subDir` テンプレート機能を使い、PVC ごとに NAS 上のサブディレクトリを自動的に分離している。
+これにより、複数のアプリが同じ NFS エクスポートをデータの混在なく共有できる。
 
-csi-driver-nfs（`nfs.csi.k8s.io`）は、NFSv4 を未対応のため、
+csi-driver-nfs（`nfs.csi.k8s.io`）は NFSv4（デフォルト）を未対応のため、
 `mountOptions`（`nfsvers=4.1`）指定することで対応する。
-認証 NAS を使っているので UID（`1001`）認証でマウントしている。
+認証 NAS を使っているので UID/GID（`1001`）マッピングでマウントしている。
 
 ## アーキテクチャ
 
-- **Namespace**: `nfs-csi`（[packages/ns/nfs-csi](../../packages/ns/nfs-csi/index.ts)）
-- **csi-driver-nfs**: ArgoCD Application（[nfs-csi-driver](../../manifests/nfs-csi.k8s.yaml)）
-- **StorageClass `nfs`**: [nfs StorageClass](../../manifests/nfs-csi.k8s.yaml)
-  （`provisioner: nfs.csi.k8s.io`）
+- **Namespace**: `kube-system`（[packages/ns/kube-system](../../packages/ns/kube-system/index.ts)）
+- **csi-driver-nfs**: ArgoCD Application（[manifests/kube-system.k8s.yaml](../../manifests/kube-system.k8s.yaml)）
+- **StorageClass `nfs`**: 同じ manifest に出力される（`provisioner: nfs.csi.k8s.io`）
 
-csi-driver-nfs は `nfs-csi` namespace に展開される。StorageClass `nfs` は
-クラスタ全体（名前空間に依存しない）で使える。
+`packages/lib/storage.ts` の `createNfsStorageClass` が StorageClass `nfs` を生成する。
+csi-driver-nfs と StorageClass `nfs` は、いずれも `kube-system` namespace を持つ Chart
+（`KubeSystemChart`）から生成される。StorageClass 自体は cluster-scoped のため、
+namespace に依存せずクラスタ全体で使える。
 
 ## StorageClass `nfs` の設定
 
-StorageClass `nfs` の主要な指定（[manifests/nfs-csi.k8s.yaml](../../manifests/nfs-csi.k8s.yaml)）:
+StorageClass `nfs` の主要な指定（`packages/lib/storage.ts` の `createNfsStorageClass`）:
 
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: nfs
-spec:
-  allowVolumeExpansion: true
-  mountOptions:
-    - nfsvers=4.1
-  parameters:
-    gid: "1001"
-    server: 192.168.1.116
-    share: /k8s-shared
-    uid: "1001"
-  provisioner: nfs.csi.k8s.io
-  reclaimPolicy: Retain
-  volumeBindingMode: Immediate
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: 192.168.1.116
+  share: /k8s-shared
+  subDir: "${pvc.metadata.namespace}/${pvc.metadata.name}"
+  uid: "1001"
+  gid: "1001"
+mountOptions:
+  - nfsvers=4.1
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
 ```
 
 | 項目 | 値 | 意味 |
 | ---- | -- | ---- |
-| `provisioner` | `nfs.csi.k8s.io` | csi-driver-nfs が PVC をプロビジョンドする |
+| `provisioner` | `nfs.csi.k8s.io` | csi-driver-nfs が PVC をプロビジョンする |
 | `server` | `192.168.1.116` | NAS の NFS 共有サーバーのアドレス（`NFS_SERVER_ADDRESS`） |
 | `share` | `/k8s-shared` | NAS が公開する NFS 共有の共有パス（`NFS_SHARE_PATH`） |
+| `subDir` | `${pvc.metadata.namespace}/${pvc.metadata.name}` | PVC ごとに NAS 上のサブディレクトリを自動分離するテンプレート |
 | `uid` / `gid` | `1001` | NAS の NFS エクスポートにマッピングされる UID/GID（`NFS_UID`） |
 | `mountOptions` | `nfsvers=4.1` | NFSv4 は未対応のため v4.1 を指定（csi-driver-nfs の制約） |
-| `volumeBindingMode` | `Immediate` | PVC の要求時点でプロビジョンド（待たずに割り当てる） |
+| `volumeBindingMode` | `Immediate` | PVC の要求時点でプロビジョンする（Pod のスケジュールを待たない） |
 | `reclaimPolicy` | `Retain` | PVC を削除しても NFS 上のデータは保持する |
 | `allowVolumeExpansion` | `true` | PVC の容量を後から拡大できる |
 
-## PVC の使い方
+`subDir` で指定したサブディレクトリは、NAS 上に存在しなければ csi-driver-nfs が再帰的に作成する。
 
-PVC の `storageClassName` に nfs を指定する。`NFS_UID` でマウントするため、
+## PVC の使い方（cdk8s ヘルパー経由、推奨）
+
+アプリは `createContainerApplication`（`packages/lib/argocd-application.ts`）で定義する。
+永続化には `packages/lib/storage.ts` の `nfsPersistence` を使い、`persistence` エントリを組み立てる。
+NAS 上のディレクトリ名は `subDir` テンプレートにより PVC の namespace/name から自動的に決まる。
+呼び出し側でディレクトリ名を指定する必要はない。
+
+```ts
+import { createContainerApplication } from "../../lib/argocd-application.js";
+import { nfsPersistence } from "../../lib/storage.js";
+
+createContainerApplication( this, "argocd-application", {
+  name: "example-app",
+  namespace: NAMESPACE,
+  targetRevision: "5.1.0",
+  image: { repository: "ghcr.io/example-org/example-app", tag: "1.0.0" },
+  persistence: {
+    data: nfsPersistence( {
+      accessMode: "ReadWriteMany",
+      size: "1Gi",
+      globalMounts: [ { path: "/data" } ],
+    } ),
+  },
+} );
+```
+
+## PVC の使い方（生の PVC、app-template を使わない場合）
+
+`storageClassName` に `nfs` を指定する。`NFS_UID` でマウントするため、
 PVC を使う workload は `fsGroup` に `NFS_UID` を指定する。
 
 ```yaml
@@ -95,21 +126,22 @@ StorageClass `nfs` が登録されているか確認する。
 kubectl get storageclass nfs
 ```
 
-csi-driver-nfs が `nfs-csi` namespace に展開されているか確認する。
+csi-driver-nfs が `kube-system` namespace に展開されているか確認する。
 
 ```sh
-kubectl get pods -n nfs-csi
+kubectl get pods -n kube-system -l app=csi-driver-nfs
 ```
 
 ## 検証と反映
 
-1. `manifests/nfs-csi.k8s.yaml` を確認する（`git diff`）。
+1. `manifests/kube-system.k8s.yaml` を確認する（`git diff`）。
 2. commit、push する。
-3. ArgoCD の root Application が変更を検知し、ArgoCD that synchronizes automatically。
-4. csi-driver-nfs が `nfs-csi` namespace にロールアウトされる。
+3. ArgoCD の root Application が変更を検知し、自動的に同期する。
+4. csi-driver-nfs と StorageClass `nfs` が `kube-system` namespace / クラスタにロールアウトされる。
 5. StorageClass `nfs` が使えるようになる。
 
 ## 関連ドキュメント
 
-- [packages/ns/nfs-csi](../../packages/ns/nfs-csi/index.ts) - `nfs-csi` namespace の Chart
-- [manifests/nfs-csi.k8s.yaml](../../manifests/nfs-csi.k8s.yaml) - synth された manifest
+- [packages/lib/storage.ts](../../packages/lib/storage.ts) - `createNfsStorageClass` / `nfsPersistence` ヘルパー
+- [packages/ns/kube-system](../../packages/ns/kube-system/index.ts) - `kube-system` namespace の Chart
+- [manifests/kube-system.k8s.yaml](../../manifests/kube-system.k8s.yaml) - synth された manifest

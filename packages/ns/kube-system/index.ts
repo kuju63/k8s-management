@@ -1,5 +1,6 @@
 import { type App, Chart } from "cdk8s";
 import { createHelmApplication } from "../../lib/argocd-application.js";
+import { createNfsStorageClass } from "../../lib/storage.js";
 
 const NAMESPACE = "kube-system";
 
@@ -47,5 +48,8 @@ export class KubeSystemChart extends Chart {
         },
       },
     } );
+
+    // csi-driver-nfs が使う StorageClass。NAS上の共有フォルダを PVC ごとに自動でサブディレクトリ分離する。
+    createNfsStorageClass( this );
   }
 }
