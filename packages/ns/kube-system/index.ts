@@ -20,5 +20,32 @@ export class KubeSystemChart extends Chart {
         fullnameOverride: "sealed-secrets-controller",
       },
     } );
+
+    createHelmApplication( this, "nfs-csi-driver", {
+      name: "nfs-csi-driver",
+      namespace: NAMESPACE,
+      repoUrl: "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts",
+      chart: "csi-driver-nfs",
+      targetRevision: "v4.13.4",
+      valuesObject: {
+        driver: {
+          image: {
+            repository: "registry.k8s.io/k8s-sig-storage/nfsplugin",
+            tag: "v4.13.4",
+          },
+          mountPermissions: "0",
+        },
+        fsGroupPolicy: "File",
+        node: {
+          tolerations: [
+            {
+              effect: "NoSchedule",
+              key: "node-role.kubernetes.io/control-plane",
+              operator: "Exists",
+            },
+          ],
+        },
+      },
+    } );
   }
 }
