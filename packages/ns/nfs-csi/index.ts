@@ -1,6 +1,7 @@
 import { ApiObject, type App, Chart } from "cdk8s";
 import { createHelmApplication } from "../../lib/argocd-application.js";
 import { NFS_SERVER_ADDRESS, NFS_SHARE_PATH, NFS_UID } from "../../lib/config.js";
+import { createNamespace } from "../../lib/namespace.js";
 
 /** NFS CSI Driver を展開する namespace 名。 */
 export const NAMESPACE = "nfs-csi";
@@ -9,6 +10,8 @@ export const NAMESPACE = "nfs-csi";
 export class NfsCsiChart extends Chart {
   constructor( app: App ) {
     super( app, NAMESPACE );
+
+    createNamespace( this, NAMESPACE );
 
     createHelmApplication( this, "nfs-csi-driver", {
       name: "nfs-csi-driver",
