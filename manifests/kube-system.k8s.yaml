@@ -64,11 +64,10 @@ allowVolumeExpansion: true
 mountOptions:
   - nfsvers=4.1
 parameters:
-  gid: "1001"
+  mountPermissions: "0777"
   server: 192.168.1.116
   share: /k8s-shared
   subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}
-  uid: "1001"
 provisioner: nfs.csi.k8s.io
 reclaimPolicy: Retain
 volumeBindingMode: Immediate

@@ -1,6 +1,6 @@
 import { ApiObject, type Chart } from "cdk8s";
 import type { AccessMode, PersistenceMount, PersistenceVolume } from "./argocd-application.js";
-import { NFS_SERVER_ADDRESS, NFS_SHARE_PATH, NFS_UID } from "./config.js";
+import { NFS_SERVER_ADDRESS, NFS_SHARE_PATH } from "./config.js";
 
 /** csi-driver-nfs (`nfs.csi.k8s.io`) が動的プロビジョニングに使う StorageClass 名。 */
 export const NFS_STORAGE_CLASS_NAME = "nfs";
@@ -28,8 +28,10 @@ export function createNfsStorageClass( chart: Chart, id = "nfs-storage-class" ):
       share: NFS_SHARE_PATH,
       // biome-ignore lint/suspicious/noTemplateCurlyInString: csi-driver-nfs 自身のテンプレート構文であり、JS の template literal ではない
       subDir: "${pvc.metadata.namespace}/${pvc.metadata.name}",
-      uid: NFS_UID,
-      gid: NFS_UID,
+      // 4.13.4では未対応のため、コメントアウト
+      // uid: NFS_UID,
+      // gid: NFS_UID,
+      mountPermissions: "0777",
     },
     // csi-driver-nfs は NFSv4 (デフォルト) 未対応のため v4.1 を明示する。
     mountOptions: [ "nfsvers=4.1" ],
