@@ -37,7 +37,7 @@ export class ArgocdChart extends Chart {
       namespace: NAMESPACE,
       repoUrl: "https://argoproj.github.io/argo-helm",
       chart: "argo-cd",
-      targetRevision: "10.3.3",
+      targetRevision: "10.8.2",
       valuesObject: {
         configs: {
           params: { "server.insecure": true },

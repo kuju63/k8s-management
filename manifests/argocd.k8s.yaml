@@ -42,7 +42,7 @@ spec:
           params:
             server.insecure: true
     repoURL: https://argoproj.github.io/argo-helm
-    targetRevision: 10.3.3
+    targetRevision: 10.8.2
   syncPolicy:
     automated:
       prune: true
