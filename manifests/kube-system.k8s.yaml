@@ -66,7 +66,7 @@ mountOptions:
 parameters:
   mountPermissions: "0777"
   server: 192.168.1.116
-  share: /k8s-shared
+  share: /volume1/k8s-shared
   subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}
 provisioner: nfs.csi.k8s.io
 reclaimPolicy: Retain

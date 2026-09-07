@@ -32,7 +32,7 @@ export const METALLB_ADDRESS_RANGE = "192.168.2.200-192.168.2.250";
 export const NFS_SERVER_ADDRESS = "192.168.1.116";
 
 /** NAS が公開する NFS 共有の共有パス。csi-driver-nfs の `parameters.share` で使う。 */
-export const NFS_SHARE_PATH = "/k8s-shared";
+export const NFS_SHARE_PATH = "/volume1/k8s-shared";
 
 /**
  * NAS の NFS エクスポートにマッピングされる UID（`no_root_squash` 環境で
