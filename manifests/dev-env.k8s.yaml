@@ -87,4 +87,3 @@ spec:
   rules:
     - backendRefs:
         - name: registory
-          port: 5000

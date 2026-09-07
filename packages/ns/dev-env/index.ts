@@ -80,7 +80,7 @@ export class DevEnvChart extends Chart {
       name: "registory-route",
       namespace: NAMESPACE,
       hostnames: [ REGISTORY_HOST ],
-      backendRefs: [ { name: "registory", port: 5000 } ],
+      backendRefs: [ { name: "registory" } ],
     } );
   }
 }
