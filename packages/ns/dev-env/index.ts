@@ -27,7 +27,7 @@ export class DevEnvChart extends Chart {
     createAppProject( this, "dev-env", {
       name: PROJECT_NAME,
       sourceNamespaces: [ NAMESPACE ],
-      sourceRepos: [ "docker.io" ],
+      sourceRepos: [ "ghcr.io/bjw-s-labs/helm" ],
       destinations: [
         {
           server: IN_CLUSTER_SERVER,

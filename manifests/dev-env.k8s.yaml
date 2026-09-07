@@ -15,7 +15,7 @@ spec:
   sourceNamespaces:
     - dev-env
   sourceRepos:
-    - docker.io
+    - ghcr.io/bjw-s-labs/helm
 ---
 apiVersion: v1
 kind: ConfigMap
