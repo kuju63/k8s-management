@@ -64,6 +64,12 @@ spec:
             size: 300Gi
             storageClass: nfs
             type: persistentVolumeClaim
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 5000
     repoURL: ghcr.io/bjw-s-labs/helm
     targetRevision: 5.1.0
   syncPolicy:
@@ -87,3 +93,4 @@ spec:
   rules:
     - backendRefs:
         - name: registory
+          port: 5000

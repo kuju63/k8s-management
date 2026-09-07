@@ -74,13 +74,18 @@ export class DevEnvChart extends Chart {
           memory: "1024Mi",
         },
       },
+      service: {
+        ports: {
+          http: { port: 5000 },
+        },
+      },
     } );
     // Docker registoryのHTTPでの公開
     createHTTPRoute( this, {
       name: "registory-route",
       namespace: NAMESPACE,
       hostnames: [ REGISTORY_HOST ],
-      backendRefs: [ { name: "registory" } ],
+      backendRefs: [ { name: "registory", port: 5000 } ],
     } );
   }
 }
