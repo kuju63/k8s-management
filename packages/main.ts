@@ -1,9 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { App } from "cdk8s";
 import { MANIFESTS_PATH } from "./lib/config.js";
-import { ActionsRunnerSystemChart } from "./ns/actions-runner-system/index.js";
 import { AIBaseSystemChart } from "./ns/ai-base/index.js";
-import { ArcRunnersChart } from "./ns/arc-runners/index.js";
 import { ArgocdChart } from "./ns/argocd/index.js";
 import { DevEnvChart } from "./ns/dev-env/index.js";
 import { EnvoyGatewaySystemChart } from "./ns/envoy-gateway-system/index.js";
@@ -19,8 +17,6 @@ function buildApp(): App {
   new EnvoyGatewaySystemChart( app );
   new LonghornSystemChart( app );
   new ArgocdChart( app );
-  new ActionsRunnerSystemChart( app );
-  new ArcRunnersChart( app );
   new MonitoringChart( app );
   new AIBaseSystemChart( app );
   new KubeSystemChart( app );
