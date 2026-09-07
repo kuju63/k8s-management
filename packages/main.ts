@@ -5,6 +5,7 @@ import { ActionsRunnerSystemChart } from "./ns/actions-runner-system/index.js";
 import { AIBaseSystemChart } from "./ns/ai-base/index.js";
 import { ArcRunnersChart } from "./ns/arc-runners/index.js";
 import { ArgocdChart } from "./ns/argocd/index.js";
+import { DevEnvChart } from "./ns/dev-env/index.js";
 import { EnvoyGatewaySystemChart } from "./ns/envoy-gateway-system/index.js";
 import { KubeSystemChart } from "./ns/kube-system/index.js";
 import { LonghornSystemChart } from "./ns/longhorn-system/index.js";
@@ -23,6 +24,7 @@ function buildApp(): App {
   new MonitoringChart( app );
   new AIBaseSystemChart( app );
   new KubeSystemChart( app );
+  new DevEnvChart( app );
 
   return app;
 }
