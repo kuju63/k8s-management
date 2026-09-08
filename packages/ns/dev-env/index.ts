@@ -46,7 +46,7 @@ export class DevEnvChart extends Chart {
       ],
     } );
 
-    createConfigMap( this, "registory-config", NAMESPACE, {
+    const configMap = createConfigMap( this, "registory-config", NAMESPACE, {
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: REGISTORY_ROOT_DIR,
       REGISTRY_HTTP_HOST: `http://${ REGISTORY_HOST }`,
     } );
@@ -79,6 +79,11 @@ export class DevEnvChart extends Chart {
           http: { port: 5000 },
         },
       },
+      envFrom: [
+        {
+          configMapRef: { name: configMap.name },
+        },
+      ],
     } );
     // Docker registoryのHTTPでの公開
     createHTTPRoute( this, {

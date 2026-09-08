@@ -44,6 +44,9 @@ spec:
           main:
             containers:
               main:
+                envFrom:
+                  - configMapRef:
+                      name: registory-config
                 image:
                   repository: docker.io/registry
                   tag: "3.1"
