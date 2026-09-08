@@ -54,7 +54,7 @@ spec:
                   requests:
                     cpu: 100m
                     memory: 256Mi
-            replicas: 3
+            replicas: 1
         nameOverride: registory
         persistence:
           registory-vol:

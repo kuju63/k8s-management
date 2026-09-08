@@ -63,7 +63,7 @@ export class DevEnvChart extends Chart {
       persistence: {
         "registory-vol": registoryPersistance,
       },
-      replicas: 3,
+      replicas: 1,
       resources: {
         requests: {
           cpu: "100m",
