@@ -1,16 +1,10 @@
 import { type App, Chart } from "cdk8s";
-import { createContainerApplication } from "../../lib/argocd-application.js";
 import { createAppProject } from "../../lib/argocd-project.js";
-import { CLUSTER_DOMAIN, IN_CLUSTER_SERVER } from "../../lib/config.js";
-import { createHTTPRoute } from "../../lib/gateway-api.js";
-import { createConfigMap } from "../../lib/k8s-configuration.js";
+import { IN_CLUSTER_SERVER } from "../../lib/config.js";
 import { createNamespace } from "../../lib/namespace.js";
-import { nfsPersistence } from "../../lib/storage.js";
 
 const NAMESPACE = "dev-env";
-const REGISTORY_ROOT_DIR = "/registory/data";
 const PROJECT_NAME = "dev-env";
-const REGISTORY_HOST = `registory.${ CLUSTER_DOMAIN }`;
 
 /**
  * 開発環境基盤のChart
@@ -36,61 +30,12 @@ export class DevEnvChart extends Chart {
       ],
     } );
 
-    const registoryPersistance = nfsPersistence( {
-      accessMode: "ReadWriteOnce",
-      size: "300Gi",
-      globalMounts: [
-        {
-          path: REGISTORY_ROOT_DIR,
-        },
-      ],
-    } );
-
-    const configMap = createConfigMap( this, "registory-config", NAMESPACE, {
-      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: REGISTORY_ROOT_DIR,
-      REGISTRY_HTTP_HOST: `http://${ REGISTORY_HOST }`,
-    } );
-
-    // Docker registory
-    createContainerApplication( this, "container-registory", {
-      name: "registory",
-      namespace: NAMESPACE,
-      project: PROJECT_NAME,
-      image: {
-        repository: "docker.io/registry",
-        tag: "3.1",
-      },
-      persistence: {
-        "registory-vol": registoryPersistance,
-      },
-      replicas: 1,
-      resources: {
-        requests: {
-          cpu: "100m",
-          memory: "256Mi",
-        },
-        limits: {
-          cpu: "500m",
-          memory: "1024Mi",
-        },
-      },
-      service: {
-        ports: {
-          http: { port: 5000 },
-        },
-      },
-      envFrom: [
-        {
-          configMapRef: { name: configMap.name },
-        },
-      ],
-    } );
     // Docker registoryのHTTPでの公開
-    createHTTPRoute( this, {
-      name: "registory-route",
-      namespace: NAMESPACE,
-      hostnames: [ REGISTORY_HOST ],
-      backendRefs: [ { name: "registory", port: 5000 } ],
-    } );
+    // createHTTPRoute( this, {
+    //   name: "registory-route",
+    //   namespace: NAMESPACE,
+    //   hostnames: [ REGISTORY_HOST ],
+    //   backendRefs: [ { name: "registory", port: 5000 } ],
+    // } );
   }
 }
