@@ -9,6 +9,9 @@ metadata:
   name: dev-env
   namespace: argocd
 spec:
+  clusterResourceWhitelist:
+    - group: ""
+      kind: PersistentVolume
   destinations:
     - namespace: dev-env
       server: https://kubernetes.default.svc
@@ -16,3 +19,69 @@ spec:
     - dev-env
   sourceRepos:
     - ghcr.io/bjw-s-labs/helm
+    - https://charts.jfrog.io
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: jfrog
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - chart: artifactory-jcr
+            name: jfrog-cr
+            repoURL: https://charts.jfrog.io
+            targetRevision: 107.161.26
+            valuesObject:
+              artifactory:
+                persistance:
+                  nfs:
+                    capacity: 200Gi
+                    haBackupMount: /volume1/k8s-shared/{NAMESPACE}/jfrog-cr/backup
+                    haDataMount: /volume1/k8s-shared/{NAMESPACE}/jfrog-cr/data
+                    ip: 192.168.1.116
+                  type: nfs
+          - chart: artifactory-oss
+            name: jfrog-artifactry
+            repoURL: https://charts.jfrog.io
+            targetRevision: 107.161.26
+            valuesObject:
+              artifactory:
+                persistance:
+                  nfs:
+                    capacity: 200Gi
+                    haBackupMount: /volume1/k8s-shared/{NAMESPACE}/jfrog-artifactry/backup
+                    haDataMount: /volume1/k8s-shared/{NAMESPACE}/jfrog-artifactry/data
+                    ip: 192.168.1.116
+                  type: nfs
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  template:
+    metadata:
+      name: "{{ .name }}"
+    spec:
+      destination:
+        namespace: dev-env
+        server: https://kubernetes.default.svc
+      project: dev-env
+      source:
+        chart: "{{ .chart }}"
+        repoURL: "{{ .repoURL }}"
+        targetRevision: "{{ .targetRevision }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true
+  templatePatch: |-
+    {{- with .valuesObject }}
+    spec:
+      source:
+        helm:
+          valuesObject:
+    {{ . | toYaml | nindent 8 }}
+    {{- end }}
