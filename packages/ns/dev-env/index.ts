@@ -1,7 +1,7 @@
 import { type App, Chart } from "cdk8s";
 import { createHelmApplicationSet } from "../../lib/argocd-applicationset.js";
 import { createAppProject } from "../../lib/argocd-project.js";
-import { IN_CLUSTER_SERVER, NFS_SERVER_ADDRESS, NFS_SHARE_PATH } from "../../lib/config.js";
+import { IN_CLUSTER_SERVER } from "../../lib/config.js";
 import { createNamespace } from "../../lib/namespace.js";
 import { createSealedSecret } from "../../lib/sealed-secret.js";
 import { NFS_STORAGE_CLASS_NAME } from "../../lib/storage.js";
@@ -31,7 +31,7 @@ export class DevEnvChart extends Chart {
           namespace: NAMESPACE,
         },
       ],
-      // NFS永続化(persistence.type: nfs)がcluster-scopeのPersistentVolumeを生成するため許可
+      // NFS永続化(persistence.storageClassName: nfs)がcluster-scopeのPersistentVolumeを生成するため許可
       clusterResourceWhitelist: [ { group: "", kind: "PersistentVolume" } ],
     } );
 
@@ -76,13 +76,12 @@ export class DevEnvChart extends Chart {
                 masterKeySecretName: crSecret.name,
                 joinKeySecretName: crSecret.name,
               },
-              persistence: {
-                type: "nfs",
-                nfs: {
-                  ip: NFS_SERVER_ADDRESS,
-                  haDataMount: `${ NFS_SHARE_PATH }/${ NAMESPACE }/jfrog-cr/data`,
-                  haBackupMount: `${ NFS_SHARE_PATH }/${ NAMESPACE }/jfrog-cr/backup`,
-                  capacity: "200Gi",
+              // artifactory-jcr chartは全値を`artifactory`直下にネストする設計のため、
+              // charts/artifactory/values.yaml側のグループキー`artifactory.persistence`に
+              // 届けるには、ここでもう一段`artifactory`を挟む必要がある(helm templateで実測済み)。
+              artifactory: {
+                persistence: {
+                  storageClassName: NFS_STORAGE_CLASS_NAME,
                 },
               },
               nginx: {
@@ -123,13 +122,11 @@ export class DevEnvChart extends Chart {
               joinKeySecretName: artifactSecret.name,
             },
             artifactory: {
-              persistence: {
-                type: "nfs",
-                nfs: {
-                  ip: NFS_SERVER_ADDRESS,
-                  haDataMount: `${ NFS_SHARE_PATH }/${ NAMESPACE }/jfrog-artifactry/data`,
-                  haBackupMount: `${ NFS_SHARE_PATH }/${ NAMESPACE }/jfrog-artifactry/backup`,
-                  capacity: "200Gi",
+              // charts/artifactory/values.yaml側のグループキー`artifactory.persistence`に
+              // 届けるには、ここでもう一段`artifactory`を挟む必要がある(helm templateで実測済み)。
+              artifactory: {
+                persistence: {
+                  storageClassName: NFS_STORAGE_CLASS_NAME,
                 },
               },
               nginx: {

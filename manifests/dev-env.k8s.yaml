@@ -60,6 +60,9 @@ spec:
             targetRevision: 107.161.20
             valuesObject:
               artifactory:
+                artifactory:
+                  persistence:
+                    storageClassName: nfs
                 global:
                   joinKeySecretName: jfrog-cr-secret
                   masterKeySecretName: jfrog-cr-secret
@@ -73,13 +76,6 @@ spec:
                     requests:
                       cpu: 100m
                       memory: 128Mi
-                persistence:
-                  nfs:
-                    capacity: 200Gi
-                    haBackupMount: /volume1/k8s-shared/dev-env/jfrog-cr/backup
-                    haDataMount: /volume1/k8s-shared/dev-env/jfrog-cr/data
-                    ip: 192.168.1.116
-                  type: nfs
                 postgresql:
                   primary:
                     persistence:
@@ -91,6 +87,9 @@ spec:
             targetRevision: 107.161.20
             valuesObject:
               artifactory:
+                artifactory:
+                  persistence:
+                    storageClassName: nfs
                 nginx:
                   https:
                     enabled: false
@@ -107,13 +106,6 @@ spec:
                       memory: 64Mi
                   startupProbe:
                     enabled: false
-                persistence:
-                  nfs:
-                    capacity: 200Gi
-                    haBackupMount: /volume1/k8s-shared/dev-env/jfrog-artifactry/backup
-                    haDataMount: /volume1/k8s-shared/dev-env/jfrog-artifactry/data
-                    ip: 192.168.1.116
-                  type: nfs
                 postgresql:
                   primary:
                     persistence:
