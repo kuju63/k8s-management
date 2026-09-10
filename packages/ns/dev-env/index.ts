@@ -84,6 +84,21 @@ export class DevEnvChart extends Chart {
                   capacity: "200Gi",
                 },
               },
+              nginx: {
+                https: {
+                  enabled: false,
+                },
+                resources: {
+                  request: {
+                    memory: "128Mi",
+                    cpu: "100m",
+                  },
+                  limits: {
+                    memory: "250Mi",
+                    cpu: "500m",
+                  },
+                },
+              },
             },
           },
         },
@@ -111,6 +126,16 @@ export class DevEnvChart extends Chart {
               nginx: {
                 https: {
                   enabled: false,
+                },
+                resources: {
+                  request: {
+                    memory: "128Mi",
+                    cpu: "100m",
+                  },
+                  limits: {
+                    memory: "250Mi",
+                    cpu: "500m",
+                  },
                 },
               },
             },

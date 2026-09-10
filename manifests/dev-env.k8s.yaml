@@ -63,6 +63,16 @@ spec:
                 global:
                   joinKeySecretName: jfrog-cr-secret
                   masterKeySecretName: jfrog-cr-secret
+                nginx:
+                  https:
+                    enabled: false
+                  resources:
+                    limits:
+                      cpu: 500m
+                      memory: 250Mi
+                    request:
+                      cpu: 100m
+                      memory: 128Mi
                 persistance:
                   nfs:
                     capacity: 200Gi
@@ -79,6 +89,13 @@ spec:
                 nginx:
                   https:
                     enabled: false
+                  resources:
+                    limits:
+                      cpu: 500m
+                      memory: 250Mi
+                    request:
+                      cpu: 100m
+                      memory: 128Mi
                 persistance:
                   nfs:
                     capacity: 200Gi
