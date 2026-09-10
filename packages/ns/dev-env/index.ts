@@ -147,6 +147,18 @@ export class DevEnvChart extends Chart {
                   },
                 },
               },
+              postgresql: {
+                resources: {
+                  requests: {
+                    cpu: "2",
+                    memory: "512Mi",
+                  },
+                  limits: {
+                    cpu: "3",
+                    memory: "2048Mi",
+                  },
+                },
+              },
             },
           },
         },
