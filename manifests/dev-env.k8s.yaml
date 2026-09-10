@@ -110,13 +110,14 @@ spec:
                     ip: 192.168.1.116
                   type: nfs
                 postgresql:
-                  resources:
-                    limits:
-                      cpu: "3"
-                      memory: 2048Mi
-                    requests:
-                      cpu: "2"
-                      memory: 512Mi
+                  primary:
+                    resources:
+                      limits:
+                        cpu: "3"
+                        memory: 2048Mi
+                      requests:
+                        cpu: "2"
+                        memory: 512Mi
               global:
                 joinKeySecretName: jfrog-artifact-secret
                 masterKeySecretName: jfrog-artifact-secret
