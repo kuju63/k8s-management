@@ -4,6 +4,7 @@ import { createAppProject } from "../../lib/argocd-project.js";
 import { IN_CLUSTER_SERVER, NFS_SERVER_ADDRESS, NFS_SHARE_PATH } from "../../lib/config.js";
 import { createNamespace } from "../../lib/namespace.js";
 import { createSealedSecret } from "../../lib/sealed-secret.js";
+import { NFS_STORAGE_CLASS_NAME } from "../../lib/storage.js";
 
 const NAMESPACE = "dev-env";
 const PROJECT_NAME = "dev-env";
@@ -75,7 +76,7 @@ export class DevEnvChart extends Chart {
                 masterKeySecretName: crSecret.name,
                 joinKeySecretName: crSecret.name,
               },
-              persistance: {
+              persistence: {
                 type: "nfs",
                 nfs: {
                   ip: NFS_SERVER_ADDRESS,
@@ -99,6 +100,14 @@ export class DevEnvChart extends Chart {
                   },
                 },
               },
+              postgresql: {
+                primary: {
+                  persistence: {
+                    storageClass: NFS_STORAGE_CLASS_NAME,
+                    size: "10Gi",
+                  },
+                },
+              },
             },
           },
         },
@@ -114,7 +123,7 @@ export class DevEnvChart extends Chart {
               joinKeySecretName: artifactSecret.name,
             },
             artifactory: {
-              persistance: {
+              persistence: {
                 type: "nfs",
                 nfs: {
                   ip: NFS_SERVER_ADDRESS,
@@ -158,6 +167,10 @@ export class DevEnvChart extends Chart {
                       cpu: "3",
                       memory: "2048Mi",
                     },
+                  },
+                  persistence: {
+                    storageClass: NFS_STORAGE_CLASS_NAME,
+                    size: "10Gi",
                   },
                 },
               },

@@ -73,13 +73,18 @@ spec:
                     requests:
                       cpu: 100m
                       memory: 128Mi
-                persistance:
+                persistence:
                   nfs:
                     capacity: 200Gi
                     haBackupMount: /volume1/k8s-shared/dev-env/jfrog-cr/backup
                     haDataMount: /volume1/k8s-shared/dev-env/jfrog-cr/data
                     ip: 192.168.1.116
                   type: nfs
+                postgresql:
+                  primary:
+                    persistence:
+                      size: 10Gi
+                      storageClass: nfs
           - chart: artifactory-oss
             name: jfrog-artifactry
             repoURL: https://charts.jfrog.io
@@ -102,7 +107,7 @@ spec:
                       memory: 64Mi
                   startupProbe:
                     enabled: false
-                persistance:
+                persistence:
                   nfs:
                     capacity: 200Gi
                     haBackupMount: /volume1/k8s-shared/dev-env/jfrog-artifactry/backup
@@ -111,6 +116,9 @@ spec:
                   type: nfs
                 postgresql:
                   primary:
+                    persistence:
+                      size: 10Gi
+                      storageClass: nfs
                     resources:
                       limits:
                         cpu: "3"
