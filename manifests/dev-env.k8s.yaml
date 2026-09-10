@@ -76,8 +76,8 @@ spec:
                 persistance:
                   nfs:
                     capacity: 200Gi
-                    haBackupMount: /volume1/k8s-shared/{NAMESPACE}/jfrog-cr/backup
-                    haDataMount: /volume1/k8s-shared/{NAMESPACE}/jfrog-cr/data
+                    haBackupMount: /volume1/k8s-shared/dev-env/jfrog-cr/backup
+                    haDataMount: /volume1/k8s-shared/dev-env/jfrog-cr/data
                     ip: 192.168.1.116
                   type: nfs
           - chart: artifactory-oss
@@ -105,10 +105,18 @@ spec:
                 persistance:
                   nfs:
                     capacity: 200Gi
-                    haBackupMount: /volume1/k8s-shared/{NAMESPACE}/jfrog-artifactry/backup
-                    haDataMount: /volume1/k8s-shared/{NAMESPACE}/jfrog-artifactry/data
+                    haBackupMount: /volume1/k8s-shared/dev-env/jfrog-artifactry/backup
+                    haDataMount: /volume1/k8s-shared/dev-env/jfrog-artifactry/data
                     ip: 192.168.1.116
                   type: nfs
+                postgresql:
+                  resources:
+                    limits:
+                      cpu: "3"
+                      memory: 2048Mi
+                    requests:
+                      cpu: "2"
+                      memory: 512Mi
               global:
                 joinKeySecretName: jfrog-artifact-secret
                 masterKeySecretName: jfrog-artifact-secret

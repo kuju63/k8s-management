@@ -79,8 +79,8 @@ export class DevEnvChart extends Chart {
                 type: "nfs",
                 nfs: {
                   ip: NFS_SERVER_ADDRESS,
-                  haDataMount: `${ NFS_SHARE_PATH }/{NAMESPACE}/jfrog-cr/data`,
-                  haBackupMount: `${ NFS_SHARE_PATH }/{NAMESPACE}/jfrog-cr/backup`,
+                  haDataMount: `${ NFS_SHARE_PATH }/${ NAMESPACE }/jfrog-cr/data`,
+                  haBackupMount: `${ NFS_SHARE_PATH }/${ NAMESPACE }/jfrog-cr/backup`,
                   capacity: "200Gi",
                 },
               },
@@ -118,8 +118,8 @@ export class DevEnvChart extends Chart {
                 type: "nfs",
                 nfs: {
                   ip: NFS_SERVER_ADDRESS,
-                  haDataMount: `${ NFS_SHARE_PATH }/{NAMESPACE}/jfrog-artifactry/data`,
-                  haBackupMount: `${ NFS_SHARE_PATH }/{NAMESPACE}/jfrog-artifactry/backup`,
+                  haDataMount: `${ NFS_SHARE_PATH }/${ NAMESPACE }/jfrog-artifactry/data`,
+                  haBackupMount: `${ NFS_SHARE_PATH }/${ NAMESPACE }/jfrog-artifactry/backup`,
                   capacity: "200Gi",
                 },
               },
