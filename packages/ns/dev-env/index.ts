@@ -68,7 +68,7 @@ export class DevEnvChart extends Chart {
           name: "jfrog-cr",
           repoUrl: "https://charts.jfrog.io",
           chart: "artifactory-jcr",
-          targetRevision: "107.161.24",
+          targetRevision: "107.161.20",
           valuesObject: {
             artifactory: {
               global: {
@@ -92,7 +92,7 @@ export class DevEnvChart extends Chart {
           name: "jfrog-artifactry",
           repoUrl: "https://charts.jfrog.io",
           chart: "artifactory-oss",
-          targetRevision: "107.161.24",
+          targetRevision: "107.161.20",
           valuesObject: {
             global: {
               masterKeySecretName: artifactSecret.name,

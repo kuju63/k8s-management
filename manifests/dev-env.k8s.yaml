@@ -57,7 +57,7 @@ spec:
           - chart: artifactory-jcr
             name: jfrog-cr
             repoURL: https://charts.jfrog.io
-            targetRevision: 107.161.24
+            targetRevision: 107.161.20
             valuesObject:
               artifactory:
                 global:
@@ -73,7 +73,7 @@ spec:
           - chart: artifactory-oss
             name: jfrog-artifactry
             repoURL: https://charts.jfrog.io
-            targetRevision: 107.161.24
+            targetRevision: 107.161.20
             valuesObject:
               artifactory:
                 nginx:
