@@ -21,6 +21,30 @@ spec:
     - ghcr.io/bjw-s-labs/helm
     - https://charts.jfrog.io
 ---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: jfrog-artifact-secret
+  namespace: dev-env
+name: jfrog-artifact-secret
+namespace: dev-env
+spec:
+  encryptedData:
+    JOIN_KEY: AgCKHSF3GEBLvDl4v8HLn9PjFnycmd2xlNqw0qWq6YYKBXSedpVbFJr4X6h1bDqZnKRw8XjYFOjC42DYAUN1byBHeTXV6x83HSVxc/sq1hyhFOH/UGQQOlAHmJ7g+HA4S40CCDIDch4QsBV/rdK0UMEYG5YedBKz3IyvtyD6lMYxBENmK9bhg56eQOr21cgVRQOxGh8aQ80KwxQDSP7Z1Rf7msD1h7z+hc5LiM+KWZj8Yysy7J1PjffFZY7FX4B9eySPb1zLzaiVHg5Bl3hN3MkFXvRRdvxlNLHt53CDKo2Y69B4NGlqFK82hdnLNpAzCx4ovL+Xr5dCk5cO8hAADnfKUvE1oU62kSPu3hEb+TSt0605k5xfvXQGQXRop0CAxX6JLlu+xkmUH1LNDPXkktIrPbg20pnwKIKHw5F8wjAZ62ltwzrfDQtGvs7Tz9KoaCqjglZSOfYfVvtHA4n9A57UhjxAE6XVo1JrcMSvMsn05lGbu9OY56G7xQFm3dTXoYs/uc8LgUCBpPPmVe2lUuepw3pRuiRO56ZsC4mN3clRS3v673zMAMsvelKnDf7Ib2I6FSM2JZ8qlLzO2g8cyCY7IzsSYqxzhTOwuYN5ya6ljYSQVApzeSX/0n5Vf9gRC46RHjam3B0X2T/VzxGtrUvyEYt9zR4V7Afy6/tMBlW+oSsR/IcxiceqC0xRUuf+Jkj6x8hjXlO9GVScl8t637wI5JFHESPyGGC3IH614pKgP/8qZM4zt7AVDZP2Gf7xKIio4ggsmsbDuaLu2IdDBPV2
+    MASTER_KEY: AgCW5PaWBBSsLfa9IL22yUuQ4peNLsP/P7e9wmF9ZJUzrRA+ccDYKwxu5GpGPYF+lcIXaNzWmD535WBZ/aL7F0uXCWOfAfeHMX7sZhpiQ7m/JL7+hKl9jANGRsC6cfKovBCRbjjdk835/hdWg1dZVNj/6ZuwKwKv6PvXKG3WwlpM8uwlC7D9QboS/We/EL6jp2Bqe1vN8jOwF1tOPRYgZ812mofe+wWoqCLeIA6C8KFExaW7s5e1vntFXXkjoiWBlrLwoxjpFqSHZnoeqxQw8f6wx7xaEUCV1vPAIc5J6HFgBoqyLeQ1/VFxgVrvBvzZ6hlXnGRPMIxu981VbaiPjpLCzNgZO5XQIYrg/8VMCk7i/25nk8VVKPTNLrarGGcaL8dbVcQBKMKERMhVs/DljMZCe8un4ySUC9mNBqe4T9k7Utu3J+WPaqos0qvjNruik9edYcuTzjw+UCzKwfXA/wA/qDiySO16x5BRdJ/6DEXcMj5pBQrwyU+WWKwESmKmIrwTrCofldfrlU7XohTcUzWxUMW1DO5TRNw0+S1d5YtNDneBeKRE0WbZtuIgAjwJCmzRtuCV2fGe/XLSWrRV+usRU9DX//oOxEyj0uWLgy2gBbpwOGdP4b0elNZ0Sr1kt/TohXcfq/QsaWBK8/2JW+EyMZeyLhur3hg2zsA8iyrH7DcLF7Ej9/295YDq6LXQQkbzvlKjAcqBQ5Lb0+WNZLyCRP49ZGai35nmFv6NUwzcLzX/P15D6E8GvV8RuGd+hSpQAAeniZ98Ou09I1e+eGro
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: jfrog-cr-secret
+  namespace: dev-env
+name: jfrog-cr-secret
+namespace: dev-env
+spec:
+  encryptedData:
+    JOIN_KEY: AgBk/KRBUdoDomL67/ytqmDzS07ZFPVdMeNLZ9PcTgiNJtvlksrmfRShO0Ycar7XCSEqWlIVoYViQVUyA8opqiPOaCNIF0GY99DW6Yz+LfP1sLIwc6wn6vUwaTEPjTl+F9hkDnb5kreEoGdB+M76nvIw+HCQAPHFdtehtZn1kvseRKz7qaBVyFs3cKTlhOen6Mr3Hqm2LQ2itgDS2vqsFTLteu1MifiONv8+ps26rxO1ku7ghxJ7lUkIqRexHcmqo2NmO27UzNimvUkyyQygL8vpr4N3siHsHxxACnaz0MhUx1iy+jh+C6at0OQHBZ1hYu715Agth4vUS+zybn6qYB2KeZEjl1Gmjjb251MPgk3kKDh0CJEzpzJ3SQE296Zpgg5F+8rl1ucMVijbeWS4PCzLNYoEMSeuYZJibb8wMwIvXcBYWV3zSR3zwXtar1SsMxKLJPeYMokbgV1bR1Ayg7rQ2KpZN+4Z7gZdSgceezBWlwRrMTUYFoKMp67H+sh4phJRqRa1KV49b7cdwrs4sQYSEEyt1ACkPo644RK+h12WohP4ZSaQquOpIWezZkZR9sWvpzixktu7wG+3VEcrlQcp5Ku5pbGWokNK1W/r8CkpcHpSLPr9aByuGYgTwa0WcMEeaP7YsNIsxYRlfoWuheb6m0GOFRTPQd7MNksJx2hwTNmah4wdhPUH/GkcFMvPED1+x9tsqZ1qTtFlmADsRCwR3Mkd7HV+Q/9XR4c9drNqoO3xPCav8K5TgTtyhJ95H1Ya1dLOLYbuvVGYbgNcqHMO
+    MASTER_KEY: AgAlA2MQ2FkZCsdWFdiO9bQJqMu5i6WO103CXZzxi3bhFULrNAKvdBSsc6tHPemHhfBQ9p/PvvgI3WR4HTYfsnPa3iHM7YNzl87GxWbcBE0Kx/0w5i+vtl7pnGsnfm4+dcyU6XC6e2izbl+Fvc6WS/DpE1k5vSZjoD5z9F5MSw0sYTrQXPiNOmVS+fa2hnsT2kwVSfAaWqlUt67RBzGTVljm2XmCdq3vleKdEItJm+D3SRNgRDhjSAlP9C67onlPtDFPhYWOo92bTIXgn7O5Zz18efum/zxYr8dh2Asq8w3DA80j8T+1NYNPPfnx92RIHNv6WHPkH2AHTJ0PM0oQhqSUYuh5zTNI3FXH82Sj6v0tpKhqP512MwJThnlb8JGV8AtpqN2Usy6GAiiPGgHDKWOgDUe1gM1gwN6Ko2yH/jgzoE93OcCcc78YwdEPlvYrXN6zx43iTM1lCVtbCbNljxuXRhr8pWBBuBy2pgyQzO7qNG0jIWa6QKE/TBAdLwX8zCWgOf6EuGRi4VzpeX6F+IV6GkT0gvorKKDmcnaIL0Ve7SoMW3nC7/KUCd4mu0hK04WF9lsk84Bar9JPHHJCbDe3IZEf18jef4rAcs9ME9UJ2WipISd/NNmEfiDRfShA/lLr4NRGqSik2Tu+u5CSDs+eB9nWD1VMbFl2wbgOF3pS5viltwngMTAk+dOZ6BSTChb51hti1AZFm1zwq/qfZ6qK5j36ZqMx+9oSClqDAg4bQC9KS1VhIdcCmfJ/eRwJdPaLKnQ2OY9tGo2gtrTG0oSo
+---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -36,6 +60,9 @@ spec:
             targetRevision: 107.161.26
             valuesObject:
               artifactory:
+                global:
+                  joinKeySecretName: jfrog-cr-secret
+                  masterKeySecretName: jfrog-cr-secret
                 persistance:
                   nfs:
                     capacity: 200Gi
@@ -49,6 +76,9 @@ spec:
             targetRevision: 107.161.26
             valuesObject:
               artifactory:
+                nginx:
+                  https:
+                    enabled: false
                 persistance:
                   nfs:
                     capacity: 200Gi
@@ -56,6 +86,9 @@ spec:
                     haDataMount: /volume1/k8s-shared/{NAMESPACE}/jfrog-artifactry/data
                     ip: 192.168.1.116
                   type: nfs
+              global:
+                joinKeySecretName: jfrog-artifact-secret
+                masterKeySecretName: jfrog-artifact-secret
   goTemplate: true
   goTemplateOptions:
     - missingkey=error
