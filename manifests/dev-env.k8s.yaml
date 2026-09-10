@@ -109,10 +109,6 @@ spec:
                 nginx:
                   https:
                     enabled: false
-                  livenessProbe:
-                    enabled: false
-                  readinessProbe:
-                    enabled: false
                   resources:
                     limits:
                       cpu: 500m
@@ -120,8 +116,6 @@ spec:
                     requests:
                       cpu: 200m
                       memory: 64Mi
-                  startupProbe:
-                    enabled: false
                 postgresql:
                   auth:
                     existingSecret: jfrog-artifact-secret

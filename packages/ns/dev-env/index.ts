@@ -169,15 +169,6 @@ export class DevEnvChart extends Chart {
                 https: {
                   enabled: false,
                 },
-                livenessProbe: {
-                  enabled: false,
-                },
-                readinessProbe: {
-                  enabled: false,
-                },
-                startupProbe: {
-                  enabled: false,
-                },
                 resources: {
                   requests: {
                     memory: "64Mi",
