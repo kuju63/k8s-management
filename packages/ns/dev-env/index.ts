@@ -109,9 +109,6 @@ export class DevEnvChart extends Chart {
           chart: "artifactory-oss",
           targetRevision: "107.161.20",
           valuesObject: {
-            probes: {
-              timeoutSeconds: 30,
-            },
             global: {
               masterKeySecretName: artifactSecret.name,
               joinKeySecretName: artifactSecret.name,
@@ -128,6 +125,15 @@ export class DevEnvChart extends Chart {
               },
               nginx: {
                 https: {
+                  enabled: false,
+                },
+                livenessProbe: {
+                  enabled: false,
+                },
+                readinessProbe: {
+                  enabled: false,
+                },
+                startupProbe: {
                   enabled: false,
                 },
                 resources: {

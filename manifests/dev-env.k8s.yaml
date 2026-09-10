@@ -89,6 +89,10 @@ spec:
                 nginx:
                   https:
                     enabled: false
+                  livenessProbe:
+                    enabled: false
+                  readinessProbe:
+                    enabled: false
                   resources:
                     limits:
                       cpu: 500m
@@ -96,6 +100,8 @@ spec:
                     requests:
                       cpu: 200m
                       memory: 64Mi
+                  startupProbe:
+                    enabled: false
                 persistance:
                   nfs:
                     capacity: 200Gi
@@ -106,8 +112,6 @@ spec:
               global:
                 joinKeySecretName: jfrog-artifact-secret
                 masterKeySecretName: jfrog-artifact-secret
-              probes:
-                timeoutSeconds: 30
   goTemplate: true
   goTemplateOptions:
     - missingkey=error
