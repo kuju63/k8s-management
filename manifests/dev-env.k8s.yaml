@@ -85,6 +85,8 @@ spec:
                     requests:
                       cpu: 100m
                       memory: 128Mi
+                  service:
+                    type: ClusterIP
                 postgresql:
                   auth:
                     existingSecret: jfrog-cr-secret
@@ -116,6 +118,8 @@ spec:
                     requests:
                       cpu: 200m
                       memory: 64Mi
+                  service:
+                    type: ClusterIP
                 postgresql:
                   auth:
                     existingSecret: jfrog-artifact-secret
@@ -162,3 +166,35 @@ spec:
           valuesObject:
     {{ . | toYaml | nindent 8 }}
     {{- end }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: jfrog-cr-route
+  namespace: dev-env
+spec:
+  hostnames:
+    - cr.home.internal
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  rules:
+    - backendRefs:
+        - name: jfrog-cr-artifactory-nginx
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: jfrog-artifactry-route
+  namespace: dev-env
+spec:
+  hostnames:
+    - artifactry.home.internal
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  rules:
+    - backendRefs:
+        - name: jfrog-artifactry-artifactory-nginx
+          port: 80

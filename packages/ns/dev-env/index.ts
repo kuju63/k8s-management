@@ -1,7 +1,8 @@
 import { type App, Chart } from "cdk8s";
 import { createHelmApplicationSet } from "../../lib/argocd-applicationset.js";
 import { createAppProject } from "../../lib/argocd-project.js";
-import { IN_CLUSTER_SERVER } from "../../lib/config.js";
+import { CLUSTER_DOMAIN, IN_CLUSTER_SERVER } from "../../lib/config.js";
+import { createHTTPRoute } from "../../lib/gateway-api.js";
 import { createNamespace } from "../../lib/namespace.js";
 import { createSealedSecret } from "../../lib/sealed-secret.js";
 import { NFS_STORAGE_CLASS_NAME } from "../../lib/storage.js";
@@ -111,6 +112,12 @@ export class DevEnvChart extends Chart {
                 https: {
                   enabled: false,
                 },
+                // 外部公開はEnvoy Gateway(HTTPRoute)経由に統一する。個別にLoadBalancer IPを
+                // 払い出すと、IP変更のたびに外部DNSが追随できない問題があるため、ここは
+                // クラスタ内部からのみ到達可能なClusterIPに固定する。
+                service: {
+                  type: "ClusterIP",
+                },
                 resources: {
                   requests: {
                     memory: "128Mi",
@@ -169,6 +176,10 @@ export class DevEnvChart extends Chart {
                 https: {
                   enabled: false,
                 },
+                // jfrog-cr側のコメントと同じ理由でClusterIPに固定し、Envoy Gateway経由で公開する。
+                service: {
+                  type: "ClusterIP",
+                },
                 resources: {
                   requests: {
                     memory: "64Mi",
@@ -207,12 +218,20 @@ export class DevEnvChart extends Chart {
       ],
     } );
 
-    // Docker registoryのHTTPでの公開
-    // createHTTPRoute( this, {
-    //   name: "registory-route",
-    //   namespace: NAMESPACE,
-    //   hostnames: [ REGISTORY_HOST ],
-    //   backendRefs: [ { name: "registory", port: 5000 } ],
-    // } );
+    // jfrog-cr / jfrog-artifactryのnginxフロントエンド(旧LoadBalancer)をEnvoy Gateway経由で公開する。
+    // backendRefsのnameはHelmチャートのfullname規則(`<release>-artifactory-nginx`)に従う。
+    createHTTPRoute( this, {
+      name: "jfrog-cr-route",
+      namespace: NAMESPACE,
+      hostnames: [ `cr.${ CLUSTER_DOMAIN }` ],
+      backendRefs: [ { name: "jfrog-cr-artifactory-nginx", port: 80 } ],
+    } );
+
+    createHTTPRoute( this, {
+      name: "jfrog-artifactry-route",
+      namespace: NAMESPACE,
+      hostnames: [ `artifactry.${ CLUSTER_DOMAIN }` ],
+      backendRefs: [ { name: "jfrog-artifactry-artifactory-nginx", port: 80 } ],
+    } );
   }
 }
