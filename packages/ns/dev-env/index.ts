@@ -89,7 +89,7 @@ export class DevEnvChart extends Chart {
                   enabled: false,
                 },
                 resources: {
-                  request: {
+                  requests: {
                     memory: "128Mi",
                     cpu: "100m",
                   },
@@ -128,7 +128,7 @@ export class DevEnvChart extends Chart {
                   enabled: false,
                 },
                 resources: {
-                  request: {
+                  requests: {
                     memory: "128Mi",
                     cpu: "100m",
                   },
