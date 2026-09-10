@@ -35,7 +35,10 @@ export class DevEnvChart extends Chart {
       clusterResourceWhitelist: [ { group: "", kind: "PersistentVolume" } ],
     } );
 
-    // JFrog Artifactのsecret
+    // JFrog Artifactのsecret。join-key/master-keyに加え、postgresql(jfrog-artifactry-postgresql)の
+    // DB認証情報(password/postgres-password)も同居させる。existingSecretで固定することで、
+    // StatefulSet/PVC再作成のたびにchart側がランダムパスワードを再生成し、DB内の実パスワードと
+    // Secretの値がずれる事故を防ぐ。
     const artifactSecret = createSealedSecret( this, {
       name: "jfrog-artifact-secret",
       namespace: NAMESPACE,
@@ -44,10 +47,15 @@ export class DevEnvChart extends Chart {
           "AgBjrec6ba01Lgyb2hYTMbipyIdef6PWU0OTJ83wSEXvDVzr8boYpruZh0Wn9XNcjqRkWPZPVcs0eSNhVg4p2kxayMZsHTlQgsmQsb4bnuR1CCID/c+X/h5YgxP/b2EejtDATW4Yq9fnHKDa/RM04SvxYAiR/T4o2Xpt/W+FB18qIfeWWpnD/rLdkPD6ffi7CDxSNhecY8JZENnG2cduFe1dRNB3yvxZtNnVnJNW/mUgQovrgO7exZTVCF/Wf4YjSOuYPzK+f/wtQUNi7GI6WgOW/bH02L5ih3DEeCxcjiESROVK6kAprj/uJh2Hyl967i0UEy3WhQi7mLcubVr1oNWnh261ojSaDTz0BuylsT6SfqzdtHPT+z7qGU9hIPYhBHuYYpHtZpvFOwZr9oJmE2pvTyZShQ7CmYwX9tkUjtlscKHvOUILBKMkSfpBZ4Qn5J/zKy82/YTqK7clFxilLLNv1WPLC/IWXkdov0zFuzLjYCVba3qDHGW02ncrSNS0asYESaQocjudl90p9GI6CwKHHCxsvAc2TZ2F7WGCjAgUfIQeEr0falLDq8VF3lwyFtB7cuwpSm6V4fZn1HFXhwh8jhAm3Ph3YDafnVucA4r/Yh6fSLqax790sGBVuhljCqx2q8kvuw4fxo8Cj7eHTs62IGMDHSKuysESxS5pFIlSKnw0lqs4HqGQbqcBZMOtHg+KqrNexaCS1DjXbJwWFmCQfiPwBZtsgypBfJoSysFpH488/ZMMs7OHmV9bImHl9nfBiL27vdclB1O3DvHEMbgC",
         "master-key":
           "AgCFPzzp6cx0LIs1YhOpBhom38MPdVbddJ6LoFkQssZaB6b1aJ5bzJoPLpRuVSYaAhJ6zU+1GRweVv4oP6iHvBLD1QRleV+6kgAgsutoB0M5zNjDa+cltKq0inDde8YDynhzrjMXWuqfn40EkCvfcCY7RYvj2FGSpE4nFtBZBL/dCHZ3mwo/Dcu0xwVjxSv9Ck8YUrgrODPiAM22i6PtXIeJDKCnHFeMgR0XFylAbkI3ZfUD8LIVr/hdvyqH5FRXGdPVmtKeBZU2OlEbG5+uyfLsTww4SQ0Ix5nVDkDJcJgajCk+dMlrgspcyxm//gR8xsCa1AIIUfDOVzsfGIF53i4mmZXypj/ygfrqezbQZfBHhKUfQibGkQYBLni09qubnF+8V9yLMZtocgL7J/uLIXWSJeVNKvommG70nsQNpORQMIdUZYiVEEEgxVdJhtAJqLpL4Qwn5fwuTqY3mEjeEGOC04JJkCmLsrCcic+JhR25QTsGUcd81cko/NpHZ3dWK0ABUiI3r3Tsu6vNb38V7RjRkpsxZZaaqwr/R1OnFNRIKFS5tjtNH5GzgddikJnnRTW79V33+1A79KCfRDpZ1azGPh/ZL8xky6BNZCjhQJsz/xSF6ygI/orHiL30wncpuwKkBapkKZ+i0bXGyXvXROM3in5V9nQGtw7zbQGRUQQ9eR+B9Z+n3ihhTdC2BCbPCgs9fgyQvYZjMbAQSYTowT1Ap//94A5hqp5GmaBFwGhUwpCZP3PuxkufIZhDpyNUUG7iHvj4g+bEoDLv06uZGRDk",
+        password:
+          "AgB4vYnmSNWAsZpSP5SATtdKnwUDWfu5cwA64+EQIAj2vf7PvpqsgEiSHe6r9lOPW2rXXOQ6ZO23j74beIvxJCF7Y2FhqEK+IeCaAyyNKDhPwibWGg3hXnWsKMXRltt65IlUTEVWef8AthHBm0M7hKYjwfgnsthE70wiAtapoeM5LBdTbR8nNuRkDcNW9SfTNZIEIpM6mLc7hQz+BSmCvn4LM0sLA9CPLovSqKNeUWE0A9odUClsWrXbuXawLaqk6lSWatdas4HgCIia8/xHtgJncScOSdk/4dwZXpJ3KKtMntb+/b9Buj7AXuOugagUW7BtrszUvWBi48ZAN4yc7o99BPqpO1V2sGmfozUWuZhojAANuCrimefzjhtan/Jl7hj0nUHdXVxCLWwct/Cnszx84y6zTMeaHYY7P58naLznIuQIqc1TA4gdQ0MsnEOHbwfHphYbJXhxadhB3dl+zOLnLJRbk/5PalmRS5mlKNki9UjX/i2GTsIuWkc/NL1BpeEjmnYxxvsu2o/qjGkaxw0FmlcaBDQSVrE75sDydVFWesJv4IU8HMcl9YkEdWAOXppJt/XvVCHPo5arhU822zhSzsy4LWTbLdL8WYE7tqNPZlTgnfeneA7wYB7r7Yhoqpx7Uym6nfrnqcow8bONCS+4SNeom0AFMLsZIbhVUdsi7yZSazx54wtR1HmBKiCS3xaiLIuSHbnwQ8OxDJ4G5HGtyKe6GnNB489bgjb+5K86",
+        "postgres-password":
+          "AgBU7C3b2w80CPkQUist2gMTgeuPARXcAjVCl3lZNQaNGoNYqrT2lCxsMk+Twc5ijHt9hehvjk/uRZYTDwQoJeeUL1EaAo7/DTzU+4DeoN371zxnasDDKDfOfXWOyXeYF+bumwOuRW2g74hLG/u+JHcOx8Da/Ju7raJDpmKiy56i0bmSM7WhLroEqvYkAvl5WU1Ue56g+RP6m2kWIdvuYWWcovY8yYXzia2CkJx1tvnxELTpAv/zaOInKTEZIHeRqT7B3mQDvUimx2mnAJRTZj/u2bLw62QNCW4EQaZfT2+Vnn5468K5j/BIPwOVJuvsdFm991bDq/qiz426MS2y2iZmi+ulfMAtD7oRrv6zHcaUo1TMFKOWYkWCHbRMElFijbZU5jCDwpvOJyCHd7xC8230RhNGS/hy/mX6YZBhG1W+tkIfE/mwnKH20pAf1/Q1nqKumBQlvDAdRv0q2MAFNiqv7ZjnN0ospFc1OIMtaVfQQ3pTxhTlDIZd5OQijV8S0ln6WQn8vbpQQDO8HYQjLkv1LFHZFFwu8HLcgyN6pJF1xzftyszEiMnK9vIwXJi4dUELTwbVFgMWuns/qAamKZHGcd7xxBEQvbmf2qQz23vBiD7mdcdDMExI2xGWblbkjC/ygJAlauqEviJXcXidudTtRS42MjJy27bFUqHI+GAxE+n7skGTTtbdb5KvrxauhCSPT8QgYCOongnPIxtfEbS6WmkoomC7NsVGaXgM2nA3",
       },
     } );
 
-    // JFrog Container Registryのsecret
+    // JFrog Container Registryのsecret。join-key/master-keyに加え、postgresqlのDB認証情報
+    // (password/postgres-password)も同居させる。理由はartifactSecretのコメントを参照。
     const crSecret = createSealedSecret( this, {
       name: "jfrog-cr-secret",
       namespace: NAMESPACE,
@@ -56,6 +64,10 @@ export class DevEnvChart extends Chart {
           "AgAmWbjNZLUAfLmPg09nKKoyUtYvfYVlsRwjP4kiHZP/aajCSdAwNTRz3bku3Ywm3eieMaQYHIQZGdgVTya4WGP7lksJNQ+MAk2TcFvZ/lFyYuAzckhb+Y1q3AMNvqyKMMqBC8omMsRpkLqAGPoVn46m9mp/31xrF5uLcbW8VNZU7dPOK7h4YwPj4D7si1IyLQCUDhFt/1J0naF/WpFN6sPKgSEIBmEUWPY4XLlYNlyzODqGZAF/sjM1KcepkG1TM25ShHpLcgxLNQx9/CIk0u3uy+31IdYA/WnJ3OJVra4f3oaFrTOTFm+A2HZIX+UIdn07Eo0D6ZaRFxxD6fXps8tcGPgBWMHljrSexzb35aj9OojsBDYJWYrydkMWQG+YQlK/7VUWIJ7PyFzqX1xM50jdIv+bOc2jpA+MhN3mRWh93Y0V0nxCjER4swmnTCCRxavouF0fJENhI1Fbl6IaTlTTeH0JA7Svc7jpzlDPjPDaiQx+BCyGkM3SM6uKadz1Y725A27Pp0EY6HzXzygs8nfHV9kv/fX1rRYqsCMcGPnpUX6vc+xjBijqY677dA+n0mGPi5hZP9bHqgAlLs/w4Yx3581LQPZQudR2eBBD6aXsUJZJThVm9BVf9PkWC7bYK5A7bafIVTG5QFEC3Jfpc2TilnXAOWY/Z+KNoUZTMIT5tz2okEMTMw/o9llVrnptsgjtvIVPc9GmLUionhQK/llIBcXEocKlDf57ciWYkMP7c09KVPVgySDaHC/HPevAwURYgJ5Bt7dbmziJCRvVVrDp",
         "master-key":
           "AgBbMv9RG4klIBN8TpU5ou/SusepvBJxVxqy6ezykYd6fmf53gLQvwWhfbT/kh+q6VFRmLjqeBpPDmZtafBuEFuDjG2n5bQk3YB8BgOBBrXxGfjBs7oyl60Z1mRAzJrHe5L7jJp8NVVpg6N6E9rjAUnMsJ2wmIFQvbwM5mBETHZyy1ef21wC8m08v+gWM+1T9SKk+OPnyNapqjZjzshi1GyPOOYQTCVgawUlPGql7p4sf9qJoJvGlyKCerJYose036VLq8/rEvKyRC9ohVRfHBJPfhl/vvtUdz7lf7dq1Ii6/vLDWvFYeaYGpTVzfji69f9j0BGVoJkQBv0yxnhgX3/rDmULjoP7yHEUc/E3iFqbd3SmoJNuXr5ovEy8fzOl5U13Qcd3okTBV9pHBJ35gRU0aKoklcMWDCHSjGbrWlz7S9asCZopRoB7MGn9/Telwn7yy+4GoYD4qyfYMEaq/xnRuq5HNpkDp3T5RCSZiNA64VT5rmNKI3FobgA/6+yFXKYBzkiqVdgL4k55bIv46s1t79+L/IBTqI6y4nD53G6MB5Lii7VmqZEgqZVjgMFWFrhHf2sCQdEo9sBy2TIWhmC01cHP58aWtKffoAOSqotZbuDfe2fKRJCCACtOljaX2IIjxAXXImX2qaC1cnFiDogFUIoiLQnPe2dugScoUyLKOTRryowi/T2hmvQObmZsouNBrp9zR1bQ7dyUSUTu6vK5aVnfA8JnXgMm+nOwMOrAVUnSR3yutOuS4vEdL2Xa/RrFpP64dfT+ee8HN3+tl1i1",
+        password:
+          "AgB1BXA+IcI03lrzqPQPGFKEJIdvNHr+furpqffzbBtj+pddHmgnmq8fIhL5HSWoxiCc7qihkBEcMZXr1SZJ9r7F1LWRmbM/Ssw5ZvIdl/r4+oFb23TqT8qinXHnmVPUWRb7SWwsozVIAIT75FML9xaZxo1fixqS/Zv8sO8pqY9Da08E6KpzDz+jRZa2t5sYbQcZheWUQH6m7DUk0bTvHrO0KRmRdScUkjKD6iAbKnAHay0yMSK9sKmFZ5jevvV3SlMShEbgOxzq388arYbWu0+ZBTp0XxyCdLjYSNxU3XMVYe1dqNDQm0fE+bWzsFAa7jgfFunFu1G1cD4BYY0vpLzO6QT/Ib2fV/bbEU1DgUqQUzPbFMRhhPpsCforXz95I3Bxwyfp69wVd7rki9ds44b1ovjGY1wMtqICdM7w1J8O4cD4oLJLHGTnHRq9J/6nGUGT0x1fK3OyD/RHvewLlWpGqpyP5YA1Ab116Q3q0xBc904cppXwOGWw8xQkSiyWbQ1RUIOl6JOBu+Czrk07n3Pg+nJpVkmyvJXgSPW6sgb14O8rJlgjgiPf/waEJpDwDh8Fn2EP5oeNmJIrAHl1vt0v9cHQ4kPC7ZkfSw4WFVD0JowH3br75AR0GP7h1gYqEwMeEaqhG/YJLodDQ9+8Zj4LrYY1fYg7AZrhuby8NSjdc9NpbN6EJ8OnYEDlhDy7zuWwiLOlKQXfezLLnt9N6Sqbf8NUvMEcU1PECRI/euni",
+        "postgres-password":
+          "AgAoEgfh4ulflAHU6s167XutTIOYg8sPfA0CQqoWyMeqOvgL/crqQBkaAJFTcRlFL6gQfRwAtgFxJat4Gs3nVcSKzSIaioUtL3Zzj5AKMjXNJmAIQtEtj64a3Si7SkR/IQIksfH3IOjAOtnqjjanmjG779TrVrlgHVRaZbAFMYs+qyiUn15JdmAOv64EGM2h3TxOXH0TmarD1DoRVEEXpF6ymM+uBiv4ziCsmtW++8cO9rVnII6WUfVnoksRXZVTUtExmG3Ch8+uUd6ciX4p2ffejQ9zsIK0x4uZ5mFaF1zHng6XSjKWqreMBlMpJPqpia0h8D6iUo6h5VzW92mUUGhnIE46GeLQ4WWwhC1QMxkpP/p1i49I3yZ6LsAJ3a9P/bfiqs81KkFb0Wo8Qq98MP5uER9+GfmgWv/WhN8jYND3hjuv2rmOsAuUEn5o9mbSILqaGL1M6KcNbQhC2LInmy99D4RRcpHjJR0TVN3mP+PNk7FbsLqR+VQ5U68A6kHoDUaDCGlOZjxndo4H0wlS0lp6ZXakIB/q7LOlH9KhjAlSA1ITDIsyVekYj329dxE1Rbtv8uHIz5DYSBSAq8wt5hTvqlZiX3y6kpNK2a2x+kZNoaXinrAMBBHl4t9306jMAIC6AeewXMZ6dajsZpZCAuWWpIfnjKgaVkNoAR5EUEpfiloTGZtAgvq3E8Lsf/rw52Ir1352VW76f9h+UkENvXx1gpNd+HYjrlbzIt+7QIzy",
       },
     } );
 
@@ -79,9 +91,20 @@ export class DevEnvChart extends Chart {
               // artifactory-jcr chartは全値を`artifactory`直下にネストする設計のため、
               // charts/artifactory/values.yaml側のグループキー`artifactory.persistence`に
               // 届けるには、ここでもう一段`artifactory`を挟む必要がある(helm templateで実測済み)。
+              // 一方`database`はnginxと同様にサブチャート自身のトップレベルキーのため1階層でよい。
               artifactory: {
                 persistence: {
                   storageClassName: NFS_STORAGE_CLASS_NAME,
+                },
+              },
+              // artifactory本体のJF_SHARED_DATABASE_PASSWORD参照先を、既定の
+              // `<release>-postgresql`ではなくcrSecret(jfrog-cr-secret)に向ける。
+              database: {
+                secrets: {
+                  password: {
+                    name: crSecret.name,
+                    key: "password",
+                  },
                 },
               },
               nginx: {
@@ -100,6 +123,9 @@ export class DevEnvChart extends Chart {
                 },
               },
               postgresql: {
+                auth: {
+                  existingSecret: crSecret.name,
+                },
                 primary: {
                   persistence: {
                     storageClass: NFS_STORAGE_CLASS_NAME,
@@ -129,6 +155,16 @@ export class DevEnvChart extends Chart {
                   storageClassName: NFS_STORAGE_CLASS_NAME,
                 },
               },
+              // artifactory本体のJF_SHARED_DATABASE_PASSWORD参照先を、既定の
+              // `<release>-postgresql`ではなくartifactSecret(jfrog-artifact-secret)に向ける。
+              database: {
+                secrets: {
+                  password: {
+                    name: artifactSecret.name,
+                    key: "password",
+                  },
+                },
+              },
               nginx: {
                 https: {
                   enabled: false,
@@ -154,6 +190,9 @@ export class DevEnvChart extends Chart {
                 },
               },
               postgresql: {
+                auth: {
+                  existingSecret: artifactSecret.name,
+                },
                 primary: {
                   resources: {
                     requests: {
