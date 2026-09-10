@@ -94,8 +94,8 @@ spec:
                       cpu: 500m
                       memory: 250Mi
                     requests:
-                      cpu: 100m
-                      memory: 128Mi
+                      cpu: 200m
+                      memory: 64Mi
                 persistance:
                   nfs:
                     capacity: 200Gi
@@ -106,6 +106,8 @@ spec:
               global:
                 joinKeySecretName: jfrog-artifact-secret
                 masterKeySecretName: jfrog-artifact-secret
+              probes:
+                timeoutSeconds: 30
   goTemplate: true
   goTemplateOptions:
     - missingkey=error

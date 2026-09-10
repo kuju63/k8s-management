@@ -109,6 +109,9 @@ export class DevEnvChart extends Chart {
           chart: "artifactory-oss",
           targetRevision: "107.161.20",
           valuesObject: {
+            probes: {
+              timeoutSeconds: 30,
+            },
             global: {
               masterKeySecretName: artifactSecret.name,
               joinKeySecretName: artifactSecret.name,
@@ -129,8 +132,8 @@ export class DevEnvChart extends Chart {
                 },
                 resources: {
                   requests: {
-                    memory: "128Mi",
-                    cpu: "100m",
+                    memory: "64Mi",
+                    cpu: "200m",
                   },
                   limits: {
                     memory: "250Mi",
