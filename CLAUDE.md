@@ -84,6 +84,8 @@ Application ヘルパー4関数と、`createHelmApplicationSet` が生成する 
 `packages/lib/namespace.ts` の `createNamespace` は Namespace リソースを1個作るだけの薄いヘルパー。
 CronJob/Job/ConfigMap/HTTPRoute 等、専用ヘルパーの無いリソースは cdk8s の生の `ApiObject` で直接記述する（各 Chart の実装例を参照）。
 
+`packages/lib/rbac.ts` は `createServiceAccount` / `createRole` / `createClusterRole` / `createRoleBinding` / `createClusterRoleBinding` の5関数を提供し、Kubernetes 1.37 の RBAC リソースを型安全に生成する。subject の種別（ServiceAccount/User/Group）と `roleRef` のスコープ（ClusterRoleBinding は ClusterRole のみ参照可）を判別可能ユニオンで制約する。詳細は [docs/rbac.md](docs/rbac.md)。
+
 `packages/lib/config.ts` に、`GATEWAY_NAME`/`GATEWAY_NAMESPACE`/`CLUSTER_DOMAIN`（HTTPRoute の`parentRefs`/`hostnames` 共通値）や `METALLB_ADDRESS_RANGE` など、複数 Chart にまたがる共有定数を集約している。
 
 ### cdk8s synth の制約
@@ -109,6 +111,8 @@ ArgoCD 自体はこのリポジトリのコードだけでは導入できない�
   CronJob/Job を生の `ApiObject` で書く方法
 - [docs/config-and-secrets.md](docs/config-and-secrets.md)
   ConfigMap/Secret の運用方針
+- [docs/rbac.md](docs/rbac.md)
+  ServiceAccount、Role、ClusterRole、RoleBinding、ClusterRoleBinding の作成方法と最小権限の指針
 - [docs/resource-deletion.md](docs/resource-deletion.md)
   namespace 丸ごと削除・個別リソース削除・緊急時の手動削除の注意点
 - [docs/git-conventions.md](docs/git-conventions.md)
