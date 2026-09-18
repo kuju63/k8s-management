@@ -328,23 +328,23 @@ export class DevEnvChart extends Chart {
             existingSecret: foregejoAdminSecret.name,
             passwordMode: "keepUpdated",
           },
-        },
-        additionalConfigSources: [
-          { secret: { secretName: foregejoAdminSecret.name } },
-          { secret: { secretName: foregejoDBSecret.name } },
-          { configMap: { name: forgejoConfigMap.name } },
-        ],
-        additionalConfigFromEnvs: [
-          {
-            name: "FORGEJO__DATABASE__PASSWD",
-            valueFrom: {
-              secretKeyRef: {
-                name: foregejoDBSecret.name,
-                key: "password",
+          additionalConfigSources: [
+            { secret: { secretName: foregejoAdminSecret.name } },
+            { secret: { secretName: foregejoDBSecret.name } },
+            { configMap: { name: forgejoConfigMap.name } },
+          ],
+          additionalConfigFromEnvs: [
+            {
+              name: "FORGEJO__DATABASE__PASSWD",
+              valueFrom: {
+                secretKeyRef: {
+                  name: foregejoDBSecret.name,
+                  key: "password",
+                },
               },
             },
-          },
-        ],
+          ],
+        },
         // DB パスワードのみ機密値。FORGEJO__DATABASE__PASSWD で app.ini の [database] PASSWD に展開される。
         persistence: {
           storageClass: NFS_STORAGE_CLASS_NAME,

@@ -311,20 +311,20 @@ spec:
     chart: forgejo
     helm:
       valuesObject:
-        additionalConfigFromEnvs:
-          - name: FORGEJO__DATABASE__PASSWD
-            valueFrom:
-              secretKeyRef:
-                key: password
-                name: forgejo-db-secret
-        additionalConfigSources:
-          - secret:
-              secretName: forgejo-admin-secret
-          - secret:
-              secretName: forgejo-db-secret
-          - configMap:
-              name: forgejo-config
         gitea:
+          additionalConfigFromEnvs:
+            - name: FORGEJO__DATABASE__PASSWD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: forgejo-db-secret
+          additionalConfigSources:
+            - secret:
+                secretName: forgejo-admin-secret
+            - secret:
+                secretName: forgejo-db-secret
+            - configMap:
+                name: forgejo-config
           admin:
             existingSecret: forgejo-admin-secret
             passwordMode: keepUpdated
