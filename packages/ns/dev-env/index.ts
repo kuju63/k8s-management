@@ -4,6 +4,7 @@ import { createHelmApplicationSet } from "../../lib/argocd-applicationset.js";
 import { createAppProject } from "../../lib/argocd-project.js";
 import { CLUSTER_DOMAIN, IN_CLUSTER_SERVER } from "../../lib/config.js";
 import { createHTTPRoute } from "../../lib/gateway-api.js";
+import { createConfigMap } from "../../lib/k8s-configuration.js";
 import { createNamespace } from "../../lib/namespace.js";
 import { createSealedSecret } from "../../lib/sealed-secret.js";
 import { NFS_STORAGE_CLASS_NAME, nfsPersistence } from "../../lib/storage.js";
@@ -85,7 +86,7 @@ export class DevEnvChart extends Chart {
 
     // Forgejo 用 PostgreSQL のDB認証情報。createContainerApplication で立てる PG と Forgejo の両方が参照する。
     // encryptedData は実装時に `kubeseal` で暗号化した値に置き換える（参照クラスタの sealing key が必要）。
-    createSealedSecret( this, {
+    const foregejoDBSecret = createSealedSecret( this, {
       name: FORGEJO_DB_SECRET,
       namespace: NAMESPACE,
       encryptedData: {
@@ -95,7 +96,7 @@ export class DevEnvChart extends Chart {
     } );
 
     // Forgejo の管理者アカウント認証情報。chart は `username` / `password` キーを期待する（ユーザー名に `admin` は不可）。
-    createSealedSecret( this, {
+    const foregejoAdminSecret = createSealedSecret( this, {
       name: FORGEJO_ADMIN_SECRET,
       namespace: NAMESPACE,
       encryptedData: {
@@ -269,7 +270,7 @@ export class DevEnvChart extends Chart {
     } );
 
     // Forgejo 用 PostgreSQL（StatefulSet）。データVolume は NFS（NAS）上に置く。認証情報は DB Secret のみ参照。
-    createContainerApplication( this, "argocd-application-forgejo-postgresql", {
+    const forgejoDb = createContainerApplication( this, "forgejo-postgresql", {
       name: FORGEJO_POSTGRES_RELEASE,
       namespace: NAMESPACE,
       project: PROJECT_NAME,
@@ -279,7 +280,7 @@ export class DevEnvChart extends Chart {
         POSTGRES_DB: "forgejo",
         POSTGRES_USER: "forgejo",
         POSTGRES_PASSWORD: {
-          secretKeyRef: { name: FORGEJO_DB_SECRET, key: "password" },
+          secretKeyRef: { name: foregejoDBSecret.name, key: "password" },
         },
       },
       resources: {
@@ -299,9 +300,19 @@ export class DevEnvChart extends Chart {
       },
     } );
 
+    const forgejoConfigMap = createConfigMap( this, "forgejo-config", NAMESPACE, {
+      FORGEJO__SERVER__DOMAIN: `forgejo.${ CLUSTER_DOMAIN }`,
+      FORGEJO__SERVER__ROOT_URL: `http://forgejo.${ CLUSTER_DOMAIN }`,
+      FORGEJO__METRICS__ENABLED: "true",
+      FORGEJO__DATABASE__DB_TYPE: "postgres",
+      FORGEJO__DATABASE__HOST: `${ forgejoDb.metadata.name }:5432`,
+      FORGEJO__DATABASE__NAME: "forgejo",
+      FORGEJO__DATABASE__USER: "forgejo",
+    } );
+
     // Forgejo（Gitea のフォークであるコードホスティング環境）。上流の公式 OCI チャートを導入する。
     // release名=forgejo なので Service 名も forgejo になる（chart の fullname 規則）。SSH は外部公開しない。
-    createHelmApplication( this, "argocd-application-forgejo", {
+    createHelmApplication( this, "application-forgejo", {
       name: FORGEJO_RELEASE,
       namespace: NAMESPACE,
       project: PROJECT_NAME,
@@ -314,34 +325,34 @@ export class DevEnvChart extends Chart {
           tag: "15.0.8",
         },
         gitea: {
-          config: {
-            database: {
-              DB_TYPE: "postgres",
-              HOST: `${ FORGEJO_POSTGRES_RELEASE }:5432`,
-              NAME: "forgejo",
-              USER: "forgejo",
-            },
-          },
           admin: {
-            existingSecret: FORGEJO_ADMIN_SECRET,
+            existingSecret: foregejoAdminSecret.name,
             passwordMode: "keepUpdated",
           },
         },
-        // DB パスワードのみ機密値。FORGEJO__DATABASE__PASSWD で app.ini の [database] PASSWD に展開される。
         additionalConfigFromEnvs: [
           {
             name: "FORGEJO__DATABASE__PASSWD",
             valueFrom: {
-              secretKeyRef: { name: FORGEJO_DB_SECRET, key: "password" },
+              secretKeyRef: {
+                name: foregejoDBSecret.name,
+                key: "password",
+              },
+            },
+          },
+          {
+            configMap: {
+              name: forgejoConfigMap.name,
             },
           },
         ],
+        // DB パスワードのみ機密値。FORGEJO__DATABASE__PASSWD で app.ini の [database] PASSWD に展開される。
         persistence: {
           storageClass: NFS_STORAGE_CLASS_NAME,
           size: "10Gi",
         },
         service: {
-          http: { type: "ClusterIP" },
+          http: { type: "ClusterIP", port: 3000 },
         },
       },
     } );

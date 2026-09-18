@@ -284,6 +284,20 @@ spec:
     syncOptions:
       - ServerSideApply=true
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forgejo-config
+  namespace: dev-env
+data:
+  FORGEJO__DATABASE__DB_TYPE: postgres
+  FORGEJO__DATABASE__HOST: forgejo-postgresql:5432
+  FORGEJO__DATABASE__NAME: forgejo
+  FORGEJO__DATABASE__USER: forgejo
+  FORGEJO__METRICS__ENABLED: "true"
+  FORGEJO__SERVER__DOMAIN: forgejo.home.internal
+  FORGEJO__SERVER__ROOT_URL: http://forgejo.home.internal
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -304,16 +318,12 @@ spec:
               secretKeyRef:
                 key: password
                 name: forgejo-db-secret
+          - configMap:
+              name: forgejo-config
         gitea:
           admin:
             existingSecret: forgejo-admin-secret
             passwordMode: keepUpdated
-          config:
-            database:
-              DB_TYPE: postgres
-              HOST: forgejo-postgresql:5432
-              NAME: forgejo
-              USER: forgejo
         image:
           rootless: true
           tag: 15.0.8
@@ -322,6 +332,7 @@ spec:
           storageClass: nfs
         service:
           http:
+            port: 3000
             type: ClusterIP
     repoURL: code.forgejo.org/forgejo-helm
     targetRevision: 17.1.6
