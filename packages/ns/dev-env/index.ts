@@ -4,6 +4,7 @@ import { createHelmApplicationSet } from "../../lib/argocd-applicationset.js";
 import { createAppProject } from "../../lib/argocd-project.js";
 import { CLUSTER_DOMAIN, IN_CLUSTER_SERVER } from "../../lib/config.js";
 import { createHTTPRoute } from "../../lib/gateway-api.js";
+import { createConfigMap } from "../../lib/k8s-configuration.js";
 import { createNamespace } from "../../lib/namespace.js";
 import { createSealedSecret } from "../../lib/sealed-secret.js";
 import { NFS_STORAGE_CLASS_NAME, nfsPersistence } from "../../lib/storage.js";
@@ -299,6 +300,15 @@ export class DevEnvChart extends Chart {
       },
     } );
 
+    const forgejoConfigMap = createConfigMap( this, "forgejo-config", NAMESPACE, {
+      FORGEJO__SERVER__DOMAIN: `forgejo.${ CLUSTER_DOMAIN }`,
+      FORGEJO__METRICS__ENABLED: "true",
+      FORGEJO__DATABASE__DB_TYPE: "postgres",
+      FORGEJO__DATABASE__HOST: `${ forgejoDb.metadata.name }:5432`,
+      FORGEJO__DATABASE__NAME: "forgejo",
+      FORGEJO__DATABASE__USER: "forgejo",
+    } );
+
     // Forgejo（Gitea のフォークであるコードホスティング環境）。上流の公式 OCI チャートを導入する。
     // release名=forgejo なので Service 名も forgejo になる（chart の fullname 規則）。SSH は外部公開しない。
     createHelmApplication( this, "application-forgejo", {
@@ -318,19 +328,12 @@ export class DevEnvChart extends Chart {
             existingSecret: foregejoAdminSecret.name,
             passwordMode: "keepUpdated",
           },
-          server: {
-            domain: `forgejo.${ CLUSTER_DOMAIN }`,
-          },
-          metrics: {
-            enabled: true,
-          },
-          database: {
-            db_type: "postgres",
-            host: `${ forgejoDb.metadata.name }:5432`,
-            name: "forgejo",
-            user: "forgejo",
-          },
         },
+        additionalConfigSources: [
+          { secret: { secretName: foregejoAdminSecret.name } },
+          { secret: { secretName: foregejoDBSecret.name } },
+          { configMap: { name: forgejoConfigMap.name } },
+        ],
         additionalConfigFromEnvs: [
           {
             name: "FORGEJO__DATABASE__PASSWD",
