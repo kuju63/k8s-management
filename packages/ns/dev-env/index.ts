@@ -4,7 +4,6 @@ import { createHelmApplicationSet } from "../../lib/argocd-applicationset.js";
 import { createAppProject } from "../../lib/argocd-project.js";
 import { CLUSTER_DOMAIN, IN_CLUSTER_SERVER } from "../../lib/config.js";
 import { createHTTPRoute } from "../../lib/gateway-api.js";
-import { createConfigMap } from "../../lib/k8s-configuration.js";
 import { createNamespace } from "../../lib/namespace.js";
 import { createSealedSecret } from "../../lib/sealed-secret.js";
 import { NFS_STORAGE_CLASS_NAME, nfsPersistence } from "../../lib/storage.js";
@@ -300,15 +299,6 @@ export class DevEnvChart extends Chart {
       },
     } );
 
-    const forgejoConfigMap = createConfigMap( this, "forgejo-config", NAMESPACE, {
-      FORGEJO__SERVER__DOMAIN: `forgejo.${ CLUSTER_DOMAIN }`,
-      FORGEJO__METRICS__ENABLED: "true",
-      FORGEJO__DATABASE__DB_TYPE: "postgres",
-      FORGEJO__DATABASE__HOST: `${ forgejoDb.metadata.name }:5432`,
-      FORGEJO__DATABASE__NAME: "forgejo",
-      FORGEJO__DATABASE__USER: "forgejo",
-    } );
-
     // Forgejo（Gitea のフォークであるコードホスティング環境）。上流の公式 OCI チャートを導入する。
     // release名=forgejo なので Service 名も forgejo になる（chart の fullname 規則）。SSH は外部公開しない。
     createHelmApplication( this, "application-forgejo", {
@@ -328,11 +318,41 @@ export class DevEnvChart extends Chart {
             existingSecret: foregejoAdminSecret.name,
             passwordMode: "keepUpdated",
           },
-          additionalConfigSources: [
-            { secret: { secretName: foregejoAdminSecret.name } },
-            { secret: { secretName: foregejoDBSecret.name } },
-            { configMap: { name: forgejoConfigMap.name } },
-          ],
+          // 非機密の app.ini 設定は gitea.config（構造化オブジェクト）に直接書く。
+          // forgejo-helm chart は _helpers.tpl の gitea.inline_configuration で
+          // `gitea.config.<section>.<KEY>` を `printf "%s=%v"` でそのまま（大文字化などの
+          // 加工なしに）`KEY=VALUE` 形式の ini 本文へ変換し、/env-to-ini-mounts/inlines/
+          // 経由で app.ini に展開する（forgejo-helm README「User defined environment
+          // variables in app.ini」節）。そのためキー名は Forgejo/Gitea の app.ini 表記に
+          // 合わせて明示的に大文字で書く必要がある。
+          //
+          // 過去に一度この方式(gitea.config直書き)を採用していたが(168bf83)、後の変更で
+          // ConfigMap + additionalConfigSources 方式に置き換えられ(df9b66d)、これが
+          // init-app-ini コンテナの `! invalid setting` 起動失敗の原因になった。
+          // additionalConfigSources は「渡す ConfigMap/Secret の各キー名が app.ini の
+          // セクション名、各キーの値が KEY=VALUE 形式の複数行 ini 本文」という特殊フォーマット
+          // を要求する（chart は各 Secret/ConfigMap を /env-to-ini-mounts/additionals/{idx}/
+          // にマウントし、k8s の Secret/ConfigMap の「各キー=個別ファイル」という性質を利用して
+          // ファイル名をセクション名として scripts/config_environment.sh がパースする）。
+          // 単純な `キー: 値` の平文ペアである admin Secret（username/password）・DB Secret・
+          // 旧 ConfigMap をこのまま渡すとフォーマット不一致でパースに失敗し起動できなかった。
+          // admin 用 Secret は gitea.admin.existingSecret、DB パスワードは下の
+          // additionalConfigFromEnvs という正規の経路が別途用意されているため、
+          // additionalConfigSources 自体がそもそも不要（重複かつ誤用だった）。
+          config: {
+            server: {
+              DOMAIN: `forgejo.${ CLUSTER_DOMAIN }`,
+            },
+            metrics: {
+              ENABLED: true,
+            },
+            database: {
+              DB_TYPE: "postgres",
+              HOST: `${ forgejoDb.metadata.name }:5432`,
+              NAME: "forgejo",
+              USER: "forgejo",
+            },
+          },
           additionalConfigFromEnvs: [
             {
               name: "FORGEJO__DATABASE__PASSWD",
@@ -345,7 +365,10 @@ export class DevEnvChart extends Chart {
             },
           ],
         },
-        // DB パスワードのみ機密値。FORGEJO__DATABASE__PASSWD で app.ini の [database] PASSWD に展開される。
+        // DB パスワードのみ機密値。additionalConfigFromEnvs の FORGEJO__DATABASE__PASSWD で
+        // app.ini の [database] PASSWD に展開される（優先順位は additionalConfigFromEnvs >
+        // additionalConfigSources > gitea.config なので、上の gitea.config.database に
+        // PASSWD を書く必要はない）。
         persistence: {
           storageClass: NFS_STORAGE_CLASS_NAME,
           size: "10Gi",
