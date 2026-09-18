@@ -326,7 +326,7 @@ spec:
             passwordMode: keepUpdated
         image:
           rootless: true
-          tag: 15.0.8
+          tag: 16.0.5
         persistence:
           size: 10Gi
           storageClass: nfs
@@ -335,7 +335,7 @@ spec:
             port: 3000
             type: ClusterIP
     repoURL: code.forgejo.org/forgejo-helm
-    targetRevision: 17.1.6
+    targetRevision: 17.1.7
   syncPolicy:
     automated:
       prune: true
@@ -356,5 +356,5 @@ spec:
       namespace: envoy-gateway-system
   rules:
     - backendRefs:
-        - name: forgejo
+        - name: forgejo-http
           port: 3000

@@ -317,12 +317,12 @@ export class DevEnvChart extends Chart {
       namespace: NAMESPACE,
       project: PROJECT_NAME,
       repoUrl: "oci://code.forgejo.org/forgejo-helm/forgejo",
-      targetRevision: "17.1.6",
+      targetRevision: "17.1.7",
       valuesObject: {
         image: {
           // rootless:true のとき chart が自動的に `-rootless` サフィックスを付与する。
           rootless: true,
-          tag: "15.0.8",
+          tag: "16.0.5",
         },
         gitea: {
           admin: {
@@ -362,7 +362,7 @@ export class DevEnvChart extends Chart {
       name: "forgejo-route",
       namespace: NAMESPACE,
       hostnames: [ `forgejo.${ CLUSTER_DOMAIN }` ],
-      backendRefs: [ { name: FORGEJO_RELEASE, port: 3000 } ],
+      backendRefs: [ { name: "forgejo-http", port: 3000 } ],
     } );
   }
 }
