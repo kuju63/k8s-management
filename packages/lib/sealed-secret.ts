@@ -102,8 +102,6 @@ export function createSealedSecret( chart: Chart, props: SealedSecretOptions ): 
   }
 
   new ApiObject( chart, props.name, {
-    name,
-    namespace,
     apiVersion: API_VERSION,
     kind: KIND,
     metadata: { name, namespace },
