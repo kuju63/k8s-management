@@ -108,6 +108,8 @@ export interface GitApplicationProps {
   readonly path: string;
   /** `path` 配下のサブディレクトリも再帰的に監視するか。省略時は `false`。 */
   readonly recurse?: boolean;
+  /** Server-Side Apply を使うか。大きな CRD を含む配布物では `true` を指定する。 */
+  readonly serverSideApply?: boolean;
 }
 
 /** 任意の git リポジトリのディレクトリを source とする ArgoCD Application を生成する。 */
@@ -130,6 +132,7 @@ export function createGitApplication( chart: Chart, id: string, props: GitApplic
       },
       syncPolicy: {
         automated: { prune: true, selfHeal: true },
+        ...( props.serverSideApply === true ? { syncOptions: [ "ServerSideApply=true" ] } : {} ),
       },
     },
   } );

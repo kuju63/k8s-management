@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pipelines-as-code
+  namespace: argocd
+spec:
+  destination:
+    namespace: pipelines-as-code
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    directory:
+      recurse: false
+    path: config
+    repoURL: https://github.com/openshift-pipelines/pipelines-as-code.git
+    targetRevision: v0.51.0
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: pipelines-as-code-route
+  namespace: pipelines-as-code
+spec:
+  hostnames:
+    - tekton.home.internal
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  rules:
+    - backendRefs:
+        - name: pipelines-as-code-controller
+          port: 8080
