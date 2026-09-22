@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tekton-ci
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: forgejo-webhook-config
+  namespace: tekton-ci
+name: forgejo-webhook-config
+namespace: tekton-ci
+spec:
+  encryptedData:
+    provider.token: AgCC7AX5ovjbdkPNwFDAyTMiEmdNJo5ulDDG2smrb5ZlI82S8GFriQZmIUMIYx9iPdsfCvMaF4vY0QdqdAOiNowIguXwbhCjM9GVqV3OnZ+N4z8+7oChRqeNBZwh5cyz1ur1Pc73LBY7wIhx7mIL0DV7WIXCpFHwlf5c6FIs5VOeMk8rSeYFKRXxh1IXX7J2vFBTGdfYX7JT81NzexLErjwB8yCoBn3OP5jY9NfJxu5kXXOCNWJiw3xr9+6T0n9KH8UtofD5wDmlAskH10/bC49Fe+qcRcDDkQxrdyUValffZx+6584e2pWFEC1FsYiEjIiWFL2cncQaOSAcyZUSSSpnQ38laZB5G5Wi95O9GZD1VjxkNx23IAHWbI1JWCIJU0ELOKsYjWACo3BORMXi10MhJObLtBYEHTp2pEW0TRU8zzDJgrCNqXw5EgHIBaOrF0sGH/jXWLBktNBQSpyezb+vNr59AY8LbdVoZ8XlhyKCSOLaHedZTE8Dq0c8eaIM/gNsTbC4ohd+FrvpynqZgtIHkmpH2p/L5LXH3B6DbHkVgdTmJ4pqMR5udDsJrX55ftC7lS00vR7H2cEXPuQXXuz2xYgG8M4Fl5/o/P1qYRvIJDFjf3MhVuGFcdzziLgfUFV3cy+6Sike572nnYTSOeA0iJXxMjulZBiOsLJ2jVru5Hn5kSQP4AKl0J4t8A3GgwLyTaQOUEUgQsdUbEn/W5+G7eI6Zq2EwP0LKokmvqKhECBMO6MNmmeQ
+    webhook.secret: AgA+3qXvOfIkOrPXUbuj49moZ7HGqSFITjCV5wC+uxgeNpzM6l4uK8GHaem5XdwNi8nR4YLjL7InR4mhNFvN+mSN7gHZvJYD9FQlXYZUqC6r3DjwR4zHMkhcm/NL7W/woGU9Mr8iWpzVUGS4oeTK7LyWv6TmsId+D5/GNQYsFS3ctGCPu5ufROETD08toYk0DUeWuaQQ+oE+P+Ir+yIWPB+IGjEoLY7BegaIW+kUiq5Q2DAjcY3ckMzUVqFixXJxCLD5ZRiedWaheTqtIDUSKKhwt4+yyjItxT5pSkwh2LOU92hbsNr14lB20lLANDGCRukFXc3K6wtJGWtOoHFGpsAfwcchMwWQZXpL0QKDESFz2Qt3nkHhx90W+DgdGjhkZY8Smoi/ZcCBJxTE+fRRCtEiXw3I2QaV+qNTz5eIjgFn4SMRXFMuC8gG4AqX7iNW5w8b0AdYSBwbm3udS4S10ZKK/yQVg6TM4e3HcbbyjbANdA04DbtwajzewYhgUwTMVwPIajcmNR4Z6z25+LuH9LkfRjjdSHSOGZ/d6RTxzw7pJyp6i9i1sYBo54cC+HoFVtq03eWHprsBEfpuj3cMfEP1LRq8hP3EgzhsPVuLQUzi9T/tdfFdGsThdhHX21c5tz0jm/rZjf1Ww80CGZ7hARnbKD6MXMijKRO/6dht/GL+EhFVN1Hh7KyqRWqXK7lTQz8MkWKQ2aMgknQREy0xIEIpVgXDADg+NHwnmXaz9/1/Noqw1V12Nm42
+---
+apiVersion: pipelinesascode.tekton.dev/v1alpha1
+kind: Repository
+metadata:
+  name: tekton-pipeline-manifest
+  namespace: tekton-ci
+spec:
+  git_provider:
+    secret:
+      key: provider.token
+      name: forgejo-webhook-config
+    type: forgejo
+    url: http://forgejo.home.internal
+    webhook_secret:
+      key: webhook.secret
+      name: forgejo-webhook-config
+  settings:
+    pipelinerun_provenance: default_branch
+  url: http://forgejo.home.internal/tekton/pipeline-manifest

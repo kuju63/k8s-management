@@ -10,6 +10,7 @@ import { LonghornSystemChart } from "./ns/longhorn-system/index.js";
 import { MetallbSystemChart } from "./ns/metallb-system/index.js";
 import { MonitoringChart } from "./ns/monitoring/index.js";
 import { PipelinesAsCodeChart } from "./ns/pipelines-as-code/index.js";
+import { TektonCiChart } from "./ns/tekton-ci/index.js";
 import { TektonPipelinesChart } from "./ns/tekton-pipelines/index.js";
 
 function buildApp(): App {
@@ -25,6 +26,7 @@ function buildApp(): App {
   new DevEnvChart( app );
   new TektonPipelinesChart( app );
   new PipelinesAsCodeChart( app );
+  new TektonCiChart( app );
 
   return app;
 }
