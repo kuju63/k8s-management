@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tekton-pipelines
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tekton-pipelines
+  namespace: argocd
+spec:
+  destination:
+    namespace: tekton-pipelines
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: tekton-pipeline
+    helm:
+      valuesObject:
+        namespace:
+          create: false
+          name: tekton-pipelines
+    repoURL: https://cdfoundation.github.io/tekton-helm-chart
+    targetRevision: 1.14.0
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
