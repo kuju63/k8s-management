@@ -49,6 +49,21 @@ export class KubeSystemChart extends Chart {
       },
     } );
 
+    // Metrics Server。metrics.k8s.io API を提供し、HPA（tekton-pipelines-webhook 等）と kubectl top が依存する。
+    // see https://github.com/kubernetes-sigs/metrics-server
+    createHelmApplication( this, "metrics-server", {
+      name: "metrics-server",
+      namespace: NAMESPACE,
+      repoUrl: "https://kubernetes-sigs.github.io/metrics-server/",
+      chart: "metrics-server",
+      targetRevision: "3.14.0",
+      valuesObject: {
+        // kubelet の serving 証明書が自己署名（serverTLSBootstrap 未設定）のため検証を省略する。
+        // serverTLSBootstrap を有効化してクラスタ CA 署名に切り替えたら、このフラグは外せる。
+        args: [ "--kubelet-insecure-tls" ],
+      },
+    } );
+
     // csi-driver-nfs が使う StorageClass。NAS上の共有フォルダを PVC ごとに自動でサブディレクトリ分離する。
     createNfsStorageClass( this );
   }
