@@ -197,6 +197,17 @@ createGitApplication(this, "argocd-application", {
 `recurse` を指定しない場合は `false` 扱いになり、`path` 直下のみを watch
 する。サブディレクトリも含めて watch したい場合は `recurse: true` を渡す。
 
+`ko`（Knative/Tekton 系プロジェクトに多いビルド・デプロイツール）でビルドされる
+upstream の場合、注意が必要。`config/` のような生ディレクトリには、Deployment
+の image が `ko://<import path>` という未解決プレースホルダのまま含まれている
+ことがある。これをそのまま source にすると `InvalidImageName` で Pod が起動でき
+ない。ArgoCD 上は `Synced` のまま `Degraded` になる。この場合は GitHub Release
+で公開される解決済み manifest（`release.yaml`/`release.k8s.yaml` 等）を使う。
+それをバージョン固定でこのリポジトリに vendor し、`createDirectoryApplication`
+で参照するパターンを
+使う。実例: `packages/ns/pipelines-as-code/`（`vendor/release.k8s.yaml` +
+`index.ts`）。
+
 ## `createContainerApplication` でコンテナイメージから直接追加する
 
 Helm チャートや Deployment/StatefulSet/Service のマニフェストを自前で書く

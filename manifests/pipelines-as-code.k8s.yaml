@@ -11,9 +11,9 @@ spec:
   source:
     directory:
       recurse: false
-    path: config
-    repoURL: https://github.com/openshift-pipelines/pipelines-as-code.git
-    targetRevision: v0.51.0
+    path: packages/ns/pipelines-as-code/vendor
+    repoURL: https://github.com/kuju63/k8s-management.git
+    targetRevision: main
   syncPolicy:
     automated:
       prune: true

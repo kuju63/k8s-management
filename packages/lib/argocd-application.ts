@@ -150,6 +150,8 @@ export interface DirectoryApplicationProps {
   readonly project?: string;
   /** `path` 配下のサブディレクトリも再帰的に監視するか。省略時は `false`。 */
   readonly recurse?: boolean;
+  /** Server-Side Apply を使うか。大きな CRD を含む配布物では `true` を指定する。 */
+  readonly serverSideApply?: boolean;
 }
 
 /** このリポジトリ自身の git ディレクトリを source とする ArgoCD Application を生成する（App-of-Apps の root 用）。 */
@@ -162,6 +164,7 @@ export function createDirectoryApplication( chart: Chart, id: string, props: Dir
     targetRevision: GIT_TARGET_REVISION,
     path: props.path,
     recurse: props.recurse ?? false,
+    ...( props.serverSideApply !== undefined ? { serverSideApply: props.serverSideApply } : {} ),
   } );
 }
 
