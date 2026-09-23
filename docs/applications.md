@@ -212,8 +212,10 @@ upstream の場合、注意が必要。`config/` のような生ディレクト�
 で公開される解決済み manifest（`release.yaml`/`release.k8s.yaml` 等）を使う。
 それをバージョン固定でこのリポジトリに vendor し、`createDirectoryApplication`
 で参照するパターンを
-使う。実例: `packages/ns/pipelines-as-code/`（`vendor/release.k8s.yaml` +
-`index.ts`）。
+使う。実例は次の2つ。
+
+- `packages/ns/pipelines-as-code/`（`vendor/release.k8s.yaml` + `index.ts`）
+- `packages/ns/tekton-pipelines/`（`vendor/dashboard/` + `index.ts`）
 
 ## `createContainerApplication` でコンテナイメージから直接追加する
 

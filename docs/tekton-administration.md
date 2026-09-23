@@ -14,7 +14,7 @@ Tekton の共通 Task・Pipeline の管理と、Tekton Pipelines・Pipelines as 
 
 | Chart | namespace | 責務 |
 | --- | --- | --- |
-| `packages/ns/tekton-pipelines/` | `tekton-pipelines` | Tekton Pipelines 本体と Remote Resolver |
+| `packages/ns/tekton-pipelines/` | `tekton-pipelines` | Tekton Pipelines 本体と Remote Resolver、Tekton Dashboard と HTTPRoute |
 | `packages/ns/pipelines-as-code/` | `pipelines-as-code` | PAC 本体と Forgejo webhook の HTTPRoute |
 | `packages/ns/tekton-ci/` | `tekton-ci` | Repository CR、共通 Task、共通 Pipeline、実行先リソース |
 
@@ -367,6 +367,32 @@ kubectl -n tekton-ci get repository.pipelinesascode.tekton.dev sharp-plugin -o y
 
 Forgejo 対応は現時点で Technology Preview である。本番相当の用途に広げる場合は、
 アップグレードごとに webhook の配信履歴、PR コメント、commit status を実測する。
+
+## Tekton Dashboard のアップグレード
+
+Dashboard は upstream の GitHub Release で公開される `release-full.yaml` を使う。
+これを `packages/ns/tekton-pipelines/vendor/dashboard/` に vendor し、
+`createDirectoryApplication` で同期する。ファイル名にバージョンを含めているため、
+アップグレード時は新しいファイルを配置し、旧ファイルを削除する。旧ファイルを
+残すと、両方の manifest が同時に適用される。
+
+`release-full` は `--read-only=false` の read-write 版である。Dashboard 自体に
+認証は無い。`tekton-dashboard.<CLUSTER_DOMAIN>` に到達できれば、全 namespace の
+Tekton リソースを作成・削除できる。自宅内ネットワーク限定の前提で公開している。
+
+アップグレード時は次を確認する。
+
+1. Dashboard が要求する Tekton Pipelines の最小バージョン
+2. ClusterRole・ClusterRoleBinding の差分（`tekton-aggregate-view`・`tekton-aggregate-edit` への依存）
+3. `extensions.dashboard.tekton.dev` CRD の変更
+4. Deployment の args と配置 namespace の変更
+
+更新後は、Deployment と HTTPRoute を確認する。
+
+```sh
+kubectl -n tekton-pipelines get deploy tekton-dashboard
+kubectl -n tekton-pipelines get httproute tekton-dashboard-route
+```
 
 ## 定期メンテナンス
 
