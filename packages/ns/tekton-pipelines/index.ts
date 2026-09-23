@@ -23,6 +23,15 @@ export class TektonPipelinesChart extends Chart {
           name: NAMESPACE,
         },
       },
+      // chart の CRD は `preserveUnknownFields: false` を明示しているが、apiextensions.k8s.io/v1 では
+      // デフォルト値の false は保存時に省略され live に現れない。恒常的な OutOfSync になるため比較から外す。
+      ignoreDifferences: [
+        {
+          group: "apiextensions.k8s.io",
+          kind: "CustomResourceDefinition",
+          jsonPointers: [ "/spec/preserveUnknownFields" ],
+        },
+      ],
     } );
   }
 }

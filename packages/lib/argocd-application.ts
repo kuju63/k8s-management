@@ -40,6 +40,25 @@ export function normalizeHelmSource( repoUrl: string, chart?: string ): Normaliz
   return { repoURL, chart: chartName };
 }
 
+/**
+ * ArgoCD の差分比較から除外するフィールドの指定（`spec.ignoreDifferences` の1要素）。
+ * API サーバーが正規化して live に残らない値など、実害のない恒常的な差分を抑えるために使う。
+ */
+export interface IgnoreDifference {
+  /** 対象リソースの API グループ。core グループは空文字列。 */
+  readonly group: string;
+  /** 対象リソースの kind。 */
+  readonly kind: string;
+  /** 対象リソース名。省略時は同じ group/kind のすべてのリソース。 */
+  readonly name?: string;
+  /** 対象リソースの namespace。省略時は namespace を問わない。 */
+  readonly namespace?: string;
+  /** 除外するフィールドの JSON Pointer（例: `/spec/preserveUnknownFields`）。 */
+  readonly jsonPointers?: readonly string[];
+  /** 除外するフィールドの JQ パス式。 */
+  readonly jqPathExpressions?: readonly string[];
+}
+
 /** `createHelmApplication` のプロパティ。 */
 export interface HelmApplicationProps {
   /** ArgoCD Application 名（= リソース名）。 */
@@ -56,6 +75,8 @@ export interface HelmApplicationProps {
   readonly targetRevision: string;
   /** Helm values を上書きするオブジェクト。指定しない場合はチャートのデフォルト値を使う。 */
   readonly valuesObject?: Record< string, unknown >;
+  /** 差分比較から除外するフィールド。省略時は除外しない。 */
+  readonly ignoreDifferences?: readonly IgnoreDifference[];
 }
 
 /** upstream の Helm チャートを source とする ArgoCD Application を生成する。 */
@@ -88,6 +109,7 @@ export function createHelmApplication( chart: Chart, id: string, props: HelmAppl
         // 大きな CRD で last-applied-configuration annotation の 256 KiB 上限を超えないようにする。
         syncOptions: [ "ServerSideApply=true" ],
       },
+      ...( props.ignoreDifferences !== undefined ? { ignoreDifferences: props.ignoreDifferences } : {} ),
     },
   } );
 }

@@ -173,6 +173,13 @@ export class ExampleHelmAppChart extends Chart {
 これにより、大きな CRD が client-side apply の
 `last-applied-configuration` annotation サイズ上限を超える問題を回避する。
 
+API サーバーが正規化するため live に現れない値を chart が明示している場合、
+Application が恒常的に OutOfSync になる。実害のない差分に限り、
+`ignoreDifferences` で対象フィールドを比較から除外できる。
+`packages/ns/tekton-pipelines/index.ts` では、CRD の
+`/spec/preserveUnknownFields` を除外している。
+このフィールドのデフォルト値 `false` は、保存時に省略される。除外する理由は呼び出し側のコメントに残す。
+
 HTTPRoute を持たないこのパターンは、MetalLB のようにクラスタ内部の
 インフラ機能を提供するだけで、外部からのルーティングが不要な場合に使う。
 
