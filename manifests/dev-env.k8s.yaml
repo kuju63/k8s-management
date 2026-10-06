@@ -425,5 +425,5 @@ spec:
       namespace: envoy-gateway-system
   rules:
     - backendRefs:
-        - name: forgejo-minio-console
+        - name: forgejo-minio
           port: 9001

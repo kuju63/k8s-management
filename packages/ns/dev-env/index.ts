@@ -444,7 +444,7 @@ export class DevEnvChart extends Chart {
       name: "mino-console",
       namespace: NAMESPACE,
       hostnames: [ `forgejo-minio.${ CLUSTER_DOMAIN }` ],
-      backendRefs: [ { name: "forgejo-minio-console", port: 9001 } ],
+      backendRefs: [ { name: "forgejo-minio", port: 9001 } ],
     } );
   }
 }
