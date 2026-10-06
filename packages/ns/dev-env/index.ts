@@ -298,7 +298,7 @@ export class DevEnvChart extends Chart {
           type: "persistentVolumeClaim",
           accessMode: "ReadWriteOnce",
           size: "10Gi",
-          storageClass: "nfs",
+          storageClass: NFS_STORAGE_CLASS_NAME,
           globalMounts: [
             {
               path: "/data",
