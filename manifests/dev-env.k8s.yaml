@@ -242,6 +242,12 @@ spec:
           main:
             containers:
               main:
+                command:
+                  - minio
+                  - server
+                  - /data
+                  - --console-address
+                  - :9001
                 env:
                   MINIO_ROOT_USER: admin
                 envFrom:

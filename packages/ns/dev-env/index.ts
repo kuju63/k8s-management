@@ -306,6 +306,7 @@ export class DevEnvChart extends Chart {
           ],
         },
       },
+      command: [ "minio", "server", "/data", "--console-address", ":9001" ],
       service: {
         ports: {
           // Web console
