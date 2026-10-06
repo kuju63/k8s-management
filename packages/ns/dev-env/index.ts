@@ -268,6 +268,58 @@ export class DevEnvChart extends Chart {
       backendRefs: [ { name: "jfrog-artifactry-artifactory-nginx", port: 80 } ],
     } );
 
+    const minioSecret = createSealedSecret( this, {
+      name: "minio-secret",
+      namespace: NAMESPACE,
+      encryptedData: {
+        MINIO_ROOT_PASSWORD:
+          "AgCYoXEV9GTcSiWr+PUnzRvFdEXtGKeZQwmbuOy4rPuA38AyNU5kGbnf76QfLoK8PbjPkFBKXnrRCEGWw6UGn5XMb5hMk6J++DSPU7jLyEHp3/FSd7MTIWwck5K2R/468Q7IHfkYbOYFd3HHAx6rpAN5uv7qPgDUppGq6z1KGeiXrNSJOl9ahZoYdv2C63rs4aUVuPHQFaA1wmwqHQ72TQSO0Ysb39IjJPf5OOm+ft0BmoiXfLpccrzH04fJ1Ggh0o8zRYxZKY57kev+5BdhED34S6PrwGo50hlvGy6RCPnp/0aKq1le6MNlq+mZOlFZsU1cAE5qmwNgUe6LJK5qcEUym9IlPAfGdAyHN0WzUyLHrdIdUS4at5op7HEpe7X73/XfMnW577JX9p3w/CBniEl1Zq7Zw7oig+xymONmVKgJ2qJVHXSrcwUbx7AAwR4rBspkw7tMZUZog7RD83cAvUgJzzwFZkn62F3rOzL3EH0JrRWPCL/PI/f4nFGeokR0roEQjsloQxjukxaZFIeP9xwV0iKwNMs/HLXVmwFlNJvJu4OQQvP3xucLIq7UOWRMUS03FT52fVKMa11GGImoEVnaelQNY0td4oku1/+taCaj9B+u1br9dF3J12OXL8isMH2kSkKB9fJ/bQQ/avVjGfV82ctQBBRklYYdBdEqUZbQxGP/HtiumiVpWhDmCbmg57Xo2saknoQsM/f6lA==",
+      },
+    } );
+
+    // forgejoのGit LFS用minio
+    createContainerApplication( this, "forgejo-minio", {
+      name: "forgejo-minio",
+      project: PROJECT_NAME,
+      namespace: NAMESPACE,
+      image: { repository: "pgsty/minio", tag: "RELEASE.2026-08-04T00-00-00Z" },
+      env: {
+        MINIO_ROOT_USER: "admin",
+      },
+      envFrom: [
+        {
+          secretRef: {
+            name: minioSecret.name,
+          },
+        },
+      ],
+      persistence: {
+        data: {
+          type: "persistentVolumeClaim",
+          accessMode: "ReadWriteOnce",
+          size: "10Gi",
+          storageClass: "nfs",
+          globalMounts: [
+            {
+              path: "/data",
+            },
+          ],
+        },
+      },
+      service: {
+        ports: {
+          // Web console
+          console: {
+            port: 9001,
+          },
+          // S3 Endpoint
+          api: {
+            port: 9000,
+          },
+        },
+      },
+    } );
+
     // Forgejo 用 PostgreSQL（StatefulSet）。データVolume は NFS（NAS）上に置く。認証情報は DB Secret のみ参照。
     const forgejoDb = createContainerApplication( this, "forgejo-postgresql", {
       name: FORGEJO_POSTGRES_RELEASE,
@@ -385,6 +437,13 @@ export class DevEnvChart extends Chart {
       namespace: NAMESPACE,
       hostnames: [ `forgejo.${ CLUSTER_DOMAIN }` ],
       backendRefs: [ { name: "forgejo-http", port: 3000 } ],
+    } );
+
+    createHTTPRoute( this, {
+      name: "mino-console",
+      namespace: NAMESPACE,
+      hostnames: [ `forgejo-minio.${ CLUSTER_DOMAIN }` ],
+      backendRefs: [ { name: "forgejo-minio-console", port: 9001 } ],
     } );
   }
 }

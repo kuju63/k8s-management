@@ -215,6 +215,67 @@ spec:
         - name: jfrog-artifactry-artifactory-nginx
           port: 80
 ---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: minio-secret
+  namespace: dev-env
+spec:
+  encryptedData:
+    MINIO_ROOT_PASSWORD: AgCYoXEV9GTcSiWr+PUnzRvFdEXtGKeZQwmbuOy4rPuA38AyNU5kGbnf76QfLoK8PbjPkFBKXnrRCEGWw6UGn5XMb5hMk6J++DSPU7jLyEHp3/FSd7MTIWwck5K2R/468Q7IHfkYbOYFd3HHAx6rpAN5uv7qPgDUppGq6z1KGeiXrNSJOl9ahZoYdv2C63rs4aUVuPHQFaA1wmwqHQ72TQSO0Ysb39IjJPf5OOm+ft0BmoiXfLpccrzH04fJ1Ggh0o8zRYxZKY57kev+5BdhED34S6PrwGo50hlvGy6RCPnp/0aKq1le6MNlq+mZOlFZsU1cAE5qmwNgUe6LJK5qcEUym9IlPAfGdAyHN0WzUyLHrdIdUS4at5op7HEpe7X73/XfMnW577JX9p3w/CBniEl1Zq7Zw7oig+xymONmVKgJ2qJVHXSrcwUbx7AAwR4rBspkw7tMZUZog7RD83cAvUgJzzwFZkn62F3rOzL3EH0JrRWPCL/PI/f4nFGeokR0roEQjsloQxjukxaZFIeP9xwV0iKwNMs/HLXVmwFlNJvJu4OQQvP3xucLIq7UOWRMUS03FT52fVKMa11GGImoEVnaelQNY0td4oku1/+taCaj9B+u1br9dF3J12OXL8isMH2kSkKB9fJ/bQQ/avVjGfV82ctQBBRklYYdBdEqUZbQxGP/HtiumiVpWhDmCbmg57Xo2saknoQsM/f6lA==
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: forgejo-minio
+  namespace: argocd
+spec:
+  destination:
+    namespace: dev-env
+    server: https://kubernetes.default.svc
+  project: dev-env
+  source:
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          main:
+            containers:
+              main:
+                env:
+                  MINIO_ROOT_USER: admin
+                envFrom:
+                  - secretRef:
+                      name: minio-secret
+                image:
+                  repository: pgsty/minio
+                  tag: RELEASE.2026-08-04T00-00-00Z
+        nameOverride: forgejo-minio
+        persistence:
+          data:
+            accessMode: ReadWriteOnce
+            globalMounts:
+              - path: /data
+            size: 10Gi
+            storageClass: nfs
+            type: persistentVolumeClaim
+        service:
+          main:
+            controller: main
+            ports:
+              api:
+                port: 9000
+              console:
+                port: 9001
+    repoURL: ghcr.io/bjw-s-labs/helm
+    targetRevision: 5.1.0
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -344,3 +405,19 @@ spec:
     - backendRefs:
         - name: forgejo-http
           port: 3000
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mino-console
+  namespace: dev-env
+spec:
+  hostnames:
+    - forgejo-minio.home.internal
+  parentRefs:
+    - name: home-gateway
+      namespace: envoy-gateway-system
+  rules:
+    - backendRefs:
+        - name: forgejo-minio-console
+          port: 9001
