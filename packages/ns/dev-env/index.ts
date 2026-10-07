@@ -103,6 +103,10 @@ export class DevEnvChart extends Chart {
           "AgATfBZCx2sKZEbLIvrRziGfDFtP7K9+uBLPu9CxxdmcWz5SqnVumvDuSPMesuW/b0+WiY3R4Q7xdyLRE7rmPzsyAr+tkszuNrmRJqYrYICC7vsJ4E9byp73dzxnsk89VIjeExtUAeQhQ5jc0t+XrXx1zOt6MMaYCej5nBzgx+luGuC/l2JS1xnNvH0XuUtXyo3igNK/50Be9zJds9SHM2CJsSGG5RkiFl/e7m2Zq7KISy17vIUSuVGqKe2Yj1Q8mwEheqJRzS5a2TILi3V7D/43/1rnDlZp10BHxQluThxLme1Tg5ptb9ukJM8kJ7seaDOpuQZ2cPRw/JMqG+qtxTU+G5q+aRS9fev6WtJ4m0f377fMOlFvF8kwi3THpp41omJqxpXVlUwHvOVgUTUPxxednJK/zvHsNxT50gF+2XeaMsEDa924RUsjhvd9UCkpAOobWkzhM3sMTaXW7XpFisfFzzWdjK0jBk8qVIUSsj6fZbosu6gCz/laOj2P+vLX0CLQl8QKZyLvjCBlYqoTaBaTgxlvyAPc92w3ofqbyEpkxgRUA5e8uL3LhxOTvQRa6+qawb3Vngkq3MW74HW1RdsbN6mqfrHgX0qRhD8hrCYWk5dsmbzdPjy0x77Y5zHnB/VLLkl6c+MmNrVHjmbezweeeHzf61sflsW69xBkcIIasXex4PeVTN0KfOt45+5x++1mTHrz2DIcmsrvKg==",
         username:
           "AgBDu70xWvNEnM0OFhmSsRKFSCESeDTMOigkZuzEWWebstrbsYEhFiaKpdhLKkdb8JOXTQmq4sX+UWazc31o2z4Rqu2PkWb25FZl9YexDye9yFfk5WpZWAihf6TjNd/ucfdSn7jCQAAucjj7GNYV4l3zjVeEdP87mVPfCGN/bxniuxgHXMpYSZwCs6/fpagKofqquyxjeYR2KHNBCa9v5u+6hYPCIyCus76/e7sl2wNFsG9Kq70541INCmaIfxgGfV39W95a4F9VSEi1Bx0aCHf56+loACysxYRzVCwTvyeZ6qER3/RBW10MOwjwO8bd9/zMUr5k8Ol02FJWbAa5l3e8Q4hpt2ewQXRcULKngWtW9/34+TRwbW9+7u0jtj/pe7+yj1CRvm/U5RYMZxauSyVrlP313xciCFOV239iL+r4xk5L53d+xI4vlvzMwWPo+v2ReyEbxXX92kDLbJoXiWJbch+HnKFmA4GlRZNZzqpzeU6neku5eSty/hp0tlNIzrc0SAXFw5pe7rKNBCfFu1iMbPVrLeZVNa+RWdBzi1gs2CshIWECIkYj+gxkUhLtTnnJrqPBWP2Mzql6kvYipQry/iZQ7eZD41+r5uMLjhVTAkJ5x99DT2cD2of/l+2bFljOYnvnGyYEvSSs0Z6XBIOvPC+hx0WJiMdyBpRxImlGVbSa115jB1RTNd8r+3ILrxb1WIrYllo=",
+        MINIO_ACCESS_KEY_ID:
+          "AgBAiEkF49Y/iBTs1QSrY1LQEgOfSdJQGttLi7fUQC2Cqu7cJFFo38aHjhtif3ol3joMVCxpDWpAuZq6i/qojDbEeyQVUuznII4gYqe/zjiJMbj24Zr/4B7aziIEto76+BXNslEd/hnnyWc3P4TMAVQHEGlGhpM/AnbZTK/IxPt8tc7ARIQsAAdH8zhi2lTmd66qkWSwvfWZahMfmlPMu+1rWPCq8HYZpDWGdut9A9okta47ZhpipuE8pRCNNEfHV/VxsjLkLEY67cMw2YLuYV6i9Lq90q8xDNR2KEqqzItBCvYY81k9RAJ3airZpS96u7pGe64KU9bL9z4F/bkIk+rDcsG+/yVXJkGEamMi/osgzRS5WRR2G31eyMbCL1akUI/ZnxEITpZU81YuTvxo6xlaUvw0hZijnMYBPPAatmznhXb4qyd9/pheo4nlUq2sYD23jzHIPvGv+DeFNi7O5QTgaWzhpU+g+2QWkgCwo0gaoZlas9XValQ3dZy2QIQsg9GJhT8KNbcXKOfFzds8uqt14UxZtlySts/60Ibuz3fi9Bi/qaI2foOkTBMW4smCK1SBCFuHGi1QmpSAUGtUQOmOfGa/6+Ac0IIH0H5n2HYpxZ3jpJP0ThxQvgUK6LvAxqXrgGRN/y+JSlCVfcphy4jPyFLWvSRZkOJg6rg0rrKdHGdafSfVWaODwvbO7H/EljSQ9xdWFLvDgqli2U3ckNGnPMQF7Q==",
+        MINIO_SECRET_KEY:
+          "AgA2WgqknhnQhInagH4DzUr70N9Bz1nybuMrIR4TAwQodmO0dcnjmMuoK3YxjuE4e0sOpvoWpl71iR3Ae3L1u9fA8I0UF5jYb6tVjgAgXzFK8K+M4ty9/lTi1sHsouOPJNvhZU787l5c5qQucT5AvjsYhCAB7m60d9bnpWERYYLSZ/Xvol79nPV2kRtAnAwVFBj5YCSCDZ9V6A0n/o6hlkzhkj9LFYLXbTF9fMtDy/p4LKRi+ek3hAp9bT/ec/bLIZQp9GUR1mZLl3ZzRmySjNDZAx7pIHG+LQrYCLqdECtdSeoWA19YBgb70JXGgBSULTkliBNCkNW2qWakqm4lbueFW4i+bi/PsRVucjQe42IU4DpXZ0Xhs4hbu2+oo9wXG5czO+dNqT9oYLj8nHyO0GR3e8lqVRQLyt2KOoP37ZpTeLwFZOtGsBZJJ26MAEZdEeQeU9WkofdM5pg9lasrAQIYlNPi5ca/6giWGFsvGrROeM9vmu/eWTVDGSkczJYIjxIm6476ZPKcvpmUN/vx6FsCJ1plFbjhUz8+fwYPgORXJYZmlT7i0M1PPJMA4TAV0a7GbZ3vwmypN+MEQd9qnByk0SVQxWOd5mFD0uT4z+3KT2AtK4SZpcs9oAJQ2bsnhnyC07lXgOHR05qebl9pNx62TxKy9QPXTTtlaaf2KeiEwGR87YysK1/Q5JTm8Y9KFGNBTRMuJEnGeup6knlLw5GwYCiFMb2wOLu2dQvMq74PyxQJ6EHpnLzD",
       },
     } );
 
@@ -278,7 +282,7 @@ export class DevEnvChart extends Chart {
     } );
 
     // forgejoのGit LFS用minio
-    createContainerApplication( this, "forgejo-minio", {
+    const minio = createContainerApplication( this, "forgejo-minio", {
       name: "forgejo-minio",
       project: PROJECT_NAME,
       namespace: NAMESPACE,
@@ -405,6 +409,15 @@ export class DevEnvChart extends Chart {
               NAME: "forgejo",
               USER: "forgejo",
             },
+            lfs: {
+              STORAGE_TYPE: "minio",
+              SERVE_DIRECT: false,
+              MINIO_ENDPOINT: `${ minio.name }:9000`,
+              MINIO_BUCKET: "forgejo",
+              MINIO_BUCKET_LOOKUP: "auto",
+              MINIO_USE_SSL: false,
+              MINIO_INSECURE_SKIP_VERIFY: false,
+            },
           },
           additionalConfigFromEnvs: [
             {
@@ -413,6 +426,24 @@ export class DevEnvChart extends Chart {
                 secretKeyRef: {
                   name: foregejoDBSecret.name,
                   key: "password",
+                },
+              },
+            },
+            {
+              name: "FORGEJO__LFS__MINIO_ACCESS_KEY_ID",
+              valueFrom: {
+                secretKeyRef: {
+                  name: foregejoAdminSecret.name,
+                  key: "MINIO_ACCESS_KEY_ID",
+                },
+              },
+            },
+            {
+              name: "FORGEJO__LFS__MINIO_SECRET_ACCESS_KEY",
+              valueFrom: {
+                secretKeyRef: {
+                  name: foregejoAdminSecret.name,
+                  key: "MINIO_SECRET_KEY",
                 },
               },
             },
