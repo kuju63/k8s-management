@@ -436,8 +436,10 @@ export class DevEnvChart extends Chart {
             {
               name: "FORGEJO__SERVER__LFS_JWT_SECRET",
               valueFrom: {
-                secretKeyRef: foregejoAdminSecret.name,
-                key: "JWT_SECRET",
+                secretKeyRef: {
+                  name: foregejoAdminSecret.name,
+                  key: "JWT_SECRET",
+                },
               },
             },
             {

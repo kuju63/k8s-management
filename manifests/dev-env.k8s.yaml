@@ -364,8 +364,9 @@ spec:
           additionalConfigFromEnvs:
             - name: FORGEJO__SERVER__LFS_JWT_SECRET
               valueFrom:
-                key: JWT_SECRET
-                secretKeyRef: forgejo-admin-secret
+                secretKeyRef:
+                  key: JWT_SECRET
+                  name: forgejo-admin-secret
             - name: FORGEJO__DATABASE__PASSWD
               valueFrom:
                 secretKeyRef:
