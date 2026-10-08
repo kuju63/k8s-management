@@ -107,6 +107,8 @@ export class DevEnvChart extends Chart {
           "AgA54SFjaTjReY0/tSnH0FXVs6Jv5cwLNFDJDaRCHIMB06kJwOm0mNJNkcsxaf5UD1ebGsKc1CSoj+Q7uioSutWgCaCdloZikKUyX9FFbUyehxHjL40Abm6x4R48+/FmVcC2NhZa2fx0//9dqC1bxy2EWWst9xSdzW8lEtan6OKk70sH28z1Ag5+ueE3uy4QIADpu3A2HpvjBv04a4OaZo3uzpBh5x7VcbJxgo3fU/hWVo/5utJ/NC/axH77ey+g5+EIki148JCMTfbyv6j3E9fyaejftlyW+Dd6/SXfW9ZHUxL3eU3s6kU5vRjljLRAGfojS2xGCCCUX8ort+yjS0IuKohjeA8kgrsQQu18vtt102RXs9vuZaW2k0iXlwF4+cYmJHrcuLj7Dy03i9Pj9UAV3xxqPvliteNLzn1dOVG0L0OMCIIY4j9Sm2oLbAZMdwaGSCoT9c2SlHdS61mS6ZIBaDpj8nZLmRn4vh9eucNCXogiJdTFnFo8vGPWDshz3QCBV9ZNAByXRjS7YXvO4f05A5DVLntIp9YK9dZ+DBvXJCvfEoLYAk6IGfK3kEkBfxcqWMsm1OYBCow88hUfBeuur9wlhqIc/awEeMsv4T3WdIUOC5HX7U4WTx4ZzclUkJNMISDfq2JhcR/AB1C4wIOJDurzuSEQ1NbVnRnGbNcRy5UqgM5DqZwyKwMeCI2SrIQdDgmmpLyOKJODIyxPuKZpNZYhkw==",
         MINIO_SECRET_KEY:
           "AgByM9oLisBtvufV0Q9q2Ysd7bBNN325ZffljwmLd/j5cM22mao54Nupf2YgbpuOEO67CNYZwFW76Ta8XyXFcIpepD3UK8e3USo3tFLGtcQ1MIZ1ZPpbng5Iz0WHWRNOlr99lg9WPNnjCtPD3jDHgeV1eDSefPqM/A6hgOiCvwMH+okaWiemDwR1rYKlAC7ugitOtYo9xHMEJXYxhgdRun4oVF4OFPcNzoboNBywuz1clG4w/oj/zhlfhcA+8TaqGR5bV/vyXwnlcayt7CYb5Y9E1vVYcyDIrlLcMlFuHwgw4RBRAb7AjjCC/LshDmftTIzrTjmA4IVLkOVisR3M+ncpTmo+hJqmOnU55l3abYoPVCr2Q4DnoYdjaLxTOhhQP5PmGqBg0FEVzDMB+DncUZORIVtB428Kd4QeWNaKjteZCFLTBYDyN4S4en9REN6D1ikWzz7i9+xitRscwZrJmpOr2hE31OSO/BjLk/OYaC8JiWWh0Ax0kRoSr7q0csPchR/JDB8+0qR7pDDxuFY+FcjAhyZC7ZL0b7L/zNS1vzoWFk1FDjVtk/ksXT6ZV+SchBDBQDCzEosOUsJviYkGvKMDrzi5vqUhN+OscZnnNB4u010nxJERU+TpEW25HK6L4lRoFBZ6I6T1oj9bp7J9GA5ztxMx/tdP6u9LClFRrOBbqe+r/K4JpUvlQW4BcLlfB2eBdrdex7rB0FIYSxclSBtQGBK2MSr3W7XUnZ3DL25ca50MFjPG+Sak",
+        JWT_SECRET:
+          "AgAhVecTKkKQFDOLwzwsdMaTdcPHofeH/9X2M7FmdMnMxyOq2zQRecc53BjjpVQxZTIT0oyGoH727WtTa1BKdCxezFvpl54uodKktkCQHoLHCHWJFQsZF+VSZxSibgHMIAmntWSRqPGrQh3d6fT9+E4ycS77ho5DRWoiC22qgTc8jloOshvoojFFh0pKUW79SIG6UPnWujqJT7p4NtOen6OR4EOsM0afVqKHmv7q2awHDMOQYcEKyyb5NTw2yeQ5jHYP/F2+N8KdlgNcjjjjb6xF8Quawjh/Mfw+Sm5ZRLXzsfmTcEeHQgEkObC/JGifSQsnQGjDdJ0WAQTsYO9BALZT7vs9r0tCZr5ykBacvJlL3Gg/3NX6tW9WMR1YBlHp++pXNSP781h3w8Xc0/goLWdwNnOO8oiLQyhRnqG+51lDygm1PZ8T2/p5gSv1GQUbrkjXMHVs0WFqXjvP9JoWke65RM3LhD0l1ZhVD6lDhYmL9vndC8cLmYdgXtx9uIOrTV4YSgt2fUYGLNUnWDNdPfAWJs+3fv7d7NgFijp0pmVJcnzRaccOV0OMLX1t7HpK9wOJZs9RC1hPjoHjyEi9iuAeWpwahkmP5ezW/7q0SePr2ymQxJr2L3nCLH+wKOno5f3eF+ebWwutbGJ2ySZQG6FaW0cgaSY9cdxfttQwHq5f0Vel2cTBGdoEaDxr5uh5Ixp7+SrycNxG2hA8il8mHEFiC9N4B+MDqWiFn5H0P0mnwlNavoHt7izhJY9t",
       },
     } );
 
@@ -399,6 +401,7 @@ export class DevEnvChart extends Chart {
           config: {
             server: {
               DOMAIN: `forgejo.${ CLUSTER_DOMAIN }`,
+              LFS_START_SERVER: true,
             },
             metrics: {
               ENABLED: true,
@@ -430,6 +433,13 @@ export class DevEnvChart extends Chart {
             },
           },
           additionalConfigFromEnvs: [
+            {
+              name: "FORGEJO__SERVER__LFS_JWT_SECRET",
+              valueFrom: {
+                secretKeyRef: foregejoAdminSecret.name,
+                key: "JWT_SECRET",
+              },
+            },
             {
               name: "FORGEJO__DATABASE__PASSWD",
               valueFrom: {
