@@ -409,6 +409,16 @@ export class DevEnvChart extends Chart {
               NAME: "forgejo",
               USER: "forgejo",
             },
+            storage: {
+              STORAGE_TYPE: "minio",
+              SERVE_DIRECT: false,
+              MINIO_ENDPOINT: `${ minio.name }:9000`,
+              MINIO_BUCKET: "forgejo",
+              MINIO_BUCKET_LOOKUP: "auto",
+              MINIO_USE_SSL: false,
+              MINIO_INSECURE_SKIP_VERIFY: false,
+              MINIO_CHECKSUM_ALGORITHM: "default",
+            },
             lfs: {
               STORAGE_TYPE: "minio",
               SERVE_DIRECT: false,
@@ -426,6 +436,24 @@ export class DevEnvChart extends Chart {
                 secretKeyRef: {
                   name: foregejoDBSecret.name,
                   key: "password",
+                },
+              },
+            },
+            {
+              name: "FORGEJO__STORAGE__MINIO_ACCESS_KEY_ID",
+              valueFrom: {
+                secretKeyRef: {
+                  name: foregejoAdminSecret.name,
+                  key: "MINIO_ACCESS_KEY_ID",
+                },
+              },
+            },
+            {
+              name: "FORGEJO__STORAGE__MINIO_SECRET_ACCESS_KEY",
+              valueFrom: {
+                secretKeyRef: {
+                  name: foregejoAdminSecret.name,
+                  key: "MINIO_SECRET_KEY",
                 },
               },
             },

@@ -366,6 +366,16 @@ spec:
                 secretKeyRef:
                   key: password
                   name: forgejo-db-secret
+            - name: FORGEJO__STORAGE__MINIO_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: MINIO_ACCESS_KEY_ID
+                  name: forgejo-admin-secret
+            - name: FORGEJO__STORAGE__MINIO_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: MINIO_SECRET_KEY
+                  name: forgejo-admin-secret
             - name: FORGEJO__LFS__MINIO_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -397,6 +407,15 @@ spec:
               ENABLED: true
             server:
               DOMAIN: forgejo.home.internal
+            storage:
+              MINIO_BUCKET: forgejo
+              MINIO_BUCKET_LOOKUP: auto
+              MINIO_CHECKSUM_ALGORITHM: default
+              MINIO_ENDPOINT: forgejo-minio:9000
+              MINIO_INSECURE_SKIP_VERIFY: false
+              MINIO_USE_SSL: false
+              SERVE_DIRECT: false
+              STORAGE_TYPE: minio
         image:
           rootless: true
           tag: 16.0.5
