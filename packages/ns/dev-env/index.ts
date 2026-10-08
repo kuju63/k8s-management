@@ -365,7 +365,7 @@ export class DevEnvChart extends Chart {
       namespace: NAMESPACE,
       project: PROJECT_NAME,
       repoUrl: "oci://code.forgejo.org/forgejo-helm/forgejo",
-      targetRevision: "17.1.7",
+      targetRevision: "17.2.0",
       valuesObject: {
         image: {
           // rootless:true のとき chart が自動的に `-rootless` サフィックスを付与する。
