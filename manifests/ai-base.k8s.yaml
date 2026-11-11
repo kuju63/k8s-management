@@ -45,7 +45,7 @@ spec:
                         LANGFLOW_SSRF_ALLOWED_HOSTS: 192.168.0.0/22,*.home.internal
                       image:
                         repository: docker.io/langflowai/langflow
-                        tag: 1.11.5
+                        tag: 1.13.2
                   pod:
                     securityContext:
                       fsGroup: 0

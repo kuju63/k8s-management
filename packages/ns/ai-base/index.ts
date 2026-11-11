@@ -44,7 +44,7 @@ export class AIBaseSystemChart extends Chart {
           replicas: 1,
           image: {
             repository: "docker.io/langflowai/langflow",
-            tag: "1.11.5",
+            tag: "1.13.2",
           },
           env: {
             LANGFLOW_AUTO_LOGIN: "true",

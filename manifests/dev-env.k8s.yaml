@@ -80,7 +80,7 @@ spec:
           - chart: artifactory-jcr
             name: jfrog-cr
             repoURL: https://charts.jfrog.io
-            targetRevision: 107.161.20
+            targetRevision: 107.161.26
             valuesObject:
               artifactory:
                 artifactory:
@@ -116,7 +116,7 @@ spec:
           - chart: artifactory-oss
             name: jfrog-artifactry
             repoURL: https://charts.jfrog.io
-            targetRevision: 107.161.20
+            targetRevision: 107.161.26
             valuesObject:
               artifactory:
                 artifactory:
@@ -257,8 +257,8 @@ spec:
                   - secretRef:
                       name: minio-secret
                 image:
-                  repository: pgsty/minio
-                  tag: RELEASE.2026-08-04T00-00-00Z
+                  repository: pgsty/silo
+                  tag: RELEASE.2026-11-09T00-00-00Z
         nameOverride: forgejo-minio
         persistence:
           data:
@@ -425,7 +425,7 @@ spec:
               STORAGE_TYPE: minio
         image:
           rootless: true
-          tag: 16.0.5
+          tag: 17.0.1
         persistence:
           size: 10Gi
           storageClass: nfs
@@ -434,7 +434,7 @@ spec:
             port: 3000
             type: ClusterIP
     repoURL: code.forgejo.org/forgejo-helm
-    targetRevision: 17.2.0
+    targetRevision: 17.3.2
   syncPolicy:
     automated:
       prune: true
