@@ -122,7 +122,7 @@ export class DevEnvChart extends Chart {
           name: "jfrog-cr",
           repoUrl: "https://charts.jfrog.io",
           chart: "artifactory-jcr",
-          targetRevision: "107.161.20",
+          targetRevision: "107.161.26",
           valuesObject: {
             artifactory: {
               global: {
@@ -188,7 +188,7 @@ export class DevEnvChart extends Chart {
           name: "jfrog-artifactry",
           repoUrl: "https://charts.jfrog.io",
           chart: "artifactory-oss",
-          targetRevision: "107.161.20",
+          targetRevision: "107.161.26",
           valuesObject: {
             global: {
               masterKeySecretName: artifactSecret.name,
@@ -288,7 +288,7 @@ export class DevEnvChart extends Chart {
       name: "forgejo-minio",
       project: PROJECT_NAME,
       namespace: NAMESPACE,
-      image: { repository: "pgsty/minio", tag: "RELEASE.2026-08-04T00-00-00Z" },
+      image: { repository: "pgsty/silo", tag: "RELEASE.2026-11-09T00-00-00Z" },
       env: {
         MINIO_ROOT_USER: "admin",
       },
@@ -365,12 +365,12 @@ export class DevEnvChart extends Chart {
       namespace: NAMESPACE,
       project: PROJECT_NAME,
       repoUrl: "oci://code.forgejo.org/forgejo-helm/forgejo",
-      targetRevision: "17.2.0",
+      targetRevision: "17.3.2",
       valuesObject: {
         image: {
           // rootless:true のとき chart が自動的に `-rootless` サフィックスを付与する。
           rootless: true,
-          tag: "16.0.5",
+          tag: "17.0.1",
         },
         gitea: {
           admin: {
