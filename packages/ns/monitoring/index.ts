@@ -1,6 +1,7 @@
-import { ApiObject, type App, Chart } from "cdk8s";
+import { type App, Chart } from "cdk8s";
 import { createContainerApplication, createHelmApplication } from "../../lib/argocd-application.js";
 import { CLUSTER_DOMAIN, GATEWAY_NAME, GATEWAY_NAMESPACE } from "../../lib/config.js";
+import { createHTTPRoute } from "../../lib/gateway-api.js";
 import { createNamespace } from "../../lib/namespace.js";
 
 const NAMESPACE = "monitoring";
@@ -254,19 +255,12 @@ export class MonitoringChart extends Chart {
     } );
 
     // 運用系UIへの経路（ノートでは点線＝要認証として明示）。認証付与は今回スコープ外。
-    new ApiObject( this, "httproute-grafana", {
-      apiVersion: "gateway.networking.k8s.io/v1",
-      kind: "HTTPRoute",
-      metadata: { name: "grafana", namespace: NAMESPACE },
-      spec: {
-        parentRefs: [ { name: GATEWAY_NAME, namespace: GATEWAY_NAMESPACE } ],
-        hostnames: [ `grafana.${ CLUSTER_DOMAIN }` ],
-        rules: [
-          {
-            backendRefs: [ { name: `${ PROMETHEUS_STACK_RELEASE }-grafana`, port: 80 } ],
-          },
-        ],
-      },
+    createHTTPRoute( this, {
+      name: "grafana-route",
+      namespace: NAMESPACE,
+      parentRefs: [ { name: GATEWAY_NAME, namespace: GATEWAY_NAMESPACE } ],
+      hostnames: [ `grafana.${ CLUSTER_DOMAIN }` ],
+      backendRefs: [ { name: `${ PROMETHEUS_STACK_RELEASE }-grafana`, port: 80 } ],
     } );
   }
 }

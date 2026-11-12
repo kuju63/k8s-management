@@ -1,6 +1,7 @@
-import { ApiObject, type App, Chart } from "cdk8s";
+import { type App, Chart } from "cdk8s";
 import { createDirectoryApplication, createHelmApplication } from "../../lib/argocd-application.js";
 import { ARGOCD_NAMESPACE, CLUSTER_DOMAIN, GATEWAY_NAME, GATEWAY_NAMESPACE, MANIFESTS_PATH } from "../../lib/config.js";
+import { createHTTPRoute } from "../../lib/gateway-api.js";
 import { createNamespace } from "../../lib/namespace.js";
 
 const NAMESPACE = ARGOCD_NAMESPACE;
@@ -47,19 +48,12 @@ export class ArgocdChart extends Chart {
 
     // 運用系UIへの経路（ノートでは点線＝要認証として明示）。
     // 認証（BasicAuth/OAuth2 Proxy等）の付与は Envoy Gateway の SecurityPolicy 等で別途行う想定で、今回はスコープ外。
-    new ApiObject( this, "httproute", {
-      apiVersion: "gateway.networking.k8s.io/v1",
-      kind: "HTTPRoute",
-      metadata: { name: "argocd", namespace: NAMESPACE },
-      spec: {
-        parentRefs: [ { name: GATEWAY_NAME, namespace: GATEWAY_NAMESPACE } ],
-        hostnames: [ `argocd.${ CLUSTER_DOMAIN }` ],
-        rules: [
-          {
-            backendRefs: [ { name: "argocd-server", port: 80 } ],
-          },
-        ],
-      },
+    createHTTPRoute( this, {
+      name: "argocd-route",
+      namespace: NAMESPACE,
+      parentRefs: [ { name: GATEWAY_NAME, namespace: GATEWAY_NAMESPACE } ],
+      hostnames: [ `argocd.${ CLUSTER_DOMAIN }` ],
+      backendRefs: [ { name: "argocd-server", port: 80 } ],
     } );
   }
 }
